@@ -12,8 +12,8 @@ public class ServoTest extends OpMode
 
     private  Servo
             ServoStanga,  ServoDreapta;
-    public static int targetstanga = 0;
-    public static int targetdreapta = 0;
+    public static double targetstanga = 0;
+    public static double targetdreapta = 0;
     @Override
     public void init()
     {
@@ -22,12 +22,27 @@ public class ServoTest extends OpMode
         ServoStanga = hardwareMap.get(Servo.class, "ServoStanga");
         ServoDreapta = hardwareMap.get(Servo.class, "ServoDreapta");
 
+        ServoStanga.setDirection(Servo.Direction.FORWARD);
+        ServoDreapta.setDirection(Servo.Direction.FORWARD);
+
+
+        //FRONT - STANGA REVERSE / DREAPTA FORWARD
+        //BACK  - STANGA FORWARD /  DREAPTA REVERSE
     }
 
     @Override
     public void loop()
     {
-        ServoDreapta.setPosition(targetdreapta);
+        if(gamepad1.a) {
+            ServoStanga.setPosition(0);
+            ServoDreapta.setPosition(1);
+        }
+        if(gamepad1.b) {
+            ServoStanga.setPosition(1);
+            ServoDreapta.setPosition(0);
+        }
+
+
 //            ServoStanga.setPosition(targetstanga);
 //            ServoDreapta.setPosition(targetdreapta);
 

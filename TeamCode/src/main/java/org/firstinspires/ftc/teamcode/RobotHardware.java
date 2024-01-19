@@ -24,9 +24,11 @@ public class RobotHardware {
     public double pid;
     boolean manualControl=false;
     PIDController pidController = new PIDController(0, 0, 0);
-    public static double kp = 0, ki = 0, kd = 0, ff = 0;
+
+    public static double kp = 0.1, ki = 0, kd = 0.001, ff = 0.1;
     public static int liftTarget = 0;
-    public static int high = 0, medium = 0, low = 0;
+
+    int high = 0, medium = 0, low = 0;
 
     public RobotHardware(HardwareMap hardwareMap) {
 
@@ -117,6 +119,7 @@ public class RobotHardware {
             Turn /= 2;
         }
         double r = Math.hypot(Strafe, Forward);
+
         double robotAngle = Math.atan2(Forward, Strafe) - Math.PI / 4;
 
         final double v1 = (r * Math.cos(robotAngle)) + Turn;
