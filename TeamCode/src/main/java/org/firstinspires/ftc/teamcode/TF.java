@@ -13,12 +13,16 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.List;
 
 @TeleOp(name = "TensorFlow movement")
 public class TF extends LinearOpMode {
+
+    ElapsedTime runtime = new ElapsedTime();
 
     private static final boolean USE_WEBCAM = true;
 
@@ -32,8 +36,6 @@ public class TF extends LinearOpMode {
     private TfodProcessor tfod;
     private VisionPortal visionPortal;
     private SampleMecanumDrive drive;
-
-    private long lastDetectionTime = 0;
 
     @Override
     public void runOpMode() {
@@ -62,12 +64,11 @@ public class TF extends LinearOpMode {
                 }
 
                 // Adăugați verificare pentru timeout
-                if (System.currentTimeMillis() - lastDetectionTime > 3000) {
+                if (runtime.seconds() > 3) {
                     // Dacă au trecut 3 secunde fără detectare, reveniți la cazul mijloc
                     telemetry.addData("Timeout", "Nu s-a găsit obiect. Revenire la mijloc.");
                     planTrajectory("Mijloc");
                     drive.followTrajectoryAsync(trajectory);
-                    lastDetectionTime = System.currentTimeMillis(); // Resetăm cronometrul
                 }
 
                 sleep(20);
@@ -155,12 +156,8 @@ public class TF extends LinearOpMode {
 
             // Planifică o traiectorie în funcție de poziția conului
             planTrajectory(conePosition);
-
-            // Executează traiectoria
-            drive.followTrajectoryAsync(trajectory);
-
-            lastDetectionTime = System.currentTimeMillis();
         }
+        drive.followTrajectoryAsync(trajectory);
     }
 
     private String determineConePosition(double relativePosition) {

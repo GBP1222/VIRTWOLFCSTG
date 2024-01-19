@@ -174,6 +174,27 @@ public class RobotHardware {
 //            LiftStanga.setPower(pidPower);
         }
     }
+
+    public void InitBratLift() {
+        ServoStanga.setPosition(0);
+        ServoDreapta.setPosition(1);
+    }
+
+    public void ArmPos(Gamepad gamepad)  {
+        if(gamepad.a) {
+            ServoStanga.setPosition(0);
+            ServoDreapta.setPosition(1);
+        }
+        if(gamepad.b) {
+            ServoStanga.setPosition(1);
+            ServoDreapta.setPosition(0);
+        }
+        if(gamepad.y) {
+            ServoStanga.setPosition(0.8);
+            ServoDreapta.setPosition(0.2);
+        }
+    }
+
     public void setLiftTarget(int pos)
     {
         liftTarget = pos;

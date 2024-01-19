@@ -18,6 +18,7 @@ public class TeleOP extends LinearOpMode {
         RobotHardware robot = new RobotHardware(hardwareMap);
 
         robot.setLiftTarget(0);
+        robot.InitBratLift();
 
         runtime.reset();
         waitForStart();
@@ -25,6 +26,7 @@ public class TeleOP extends LinearOpMode {
         {
 
             robot.LiftPID(gamepad2);
+            robot.ArmPos(gamepad2);
             robot.DriveMovement(gamepad1);
             robot.ClawManager(gamepad2);
 
