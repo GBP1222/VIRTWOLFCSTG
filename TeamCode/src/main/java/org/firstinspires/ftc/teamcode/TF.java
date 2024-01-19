@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,29 +10,40 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.List;
 
-@TeleOp(name = "TensorFlow Object Detection")
+@TeleOp(name = "TensorFlow movement")
 public class TF extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;
 
-    private static final String TFOD_MODEL_ASSET = "modelCoroana.tflite";
+    // Calea către modelul TensorFlow și etichetele claselor
     private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/modelCoroana.tflite";
+    private static final String TFOD_MODEL_FILE2 = "/sdcard/FIRST/tflitemodels/modelCoroanaRosu.tflite";
     private static final String[] LABELS = {
-            "cone",
+            "con",
     };
 
     private TfodProcessor tfod;
     private VisionPortal visionPortal;
+    private SampleMecanumDrive drive;
+
+    private long lastDetectionTime = 0;
+
     @Override
     public void runOpMode() {
 
+        drive = new SampleMecanumDrive(hardwareMap);
+
         initTfod();
 
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
+        telemetry.addData("Previzualizare DS on/off", "3 puncte, Fluxul camerei");
+        telemetry.addData(">", "Atingeți Play pentru a începe OpMode");
         telemetry.update();
         waitForStart();
 
@@ -41,14 +51,23 @@ public class TF extends LinearOpMode {
             while (opModeIsActive()) {
 
                 telemetryTfod();
-
+                processConePosition();
                 telemetry.update();
 
-                // Save CPU resources; can resume streaming when needed.
+                // Economisiți resurse CPU; se poate relua streaming-ul când este necesar.
                 if (gamepad1.dpad_down) {
                     visionPortal.stopStreaming();
                 } else if (gamepad1.dpad_up) {
                     visionPortal.resumeStreaming();
+                }
+
+                // Adăugați verificare pentru timeout
+                if (System.currentTimeMillis() - lastDetectionTime > 3000) {
+                    // Dacă au trecut 3 secunde fără detectare, reveniți la cazul mijloc
+                    telemetry.addData("Timeout", "Nu s-a găsit obiect. Revenire la mijloc.");
+                    planTrajectory("Mijloc");
+                    drive.followTrajectoryAsync(trajectory);
+                    lastDetectionTime = System.currentTimeMillis(); // Resetăm cronometrul
                 }
 
                 sleep(20);
@@ -59,75 +78,120 @@ public class TF extends LinearOpMode {
     }
 
     /**
-     * Initialize the TensorFlow Object Detection processor.
+     * Inițializați procesorul de detecție a obiectelor TensorFlow.
      */
     private void initTfod() {
         tfod = new TfodProcessor.Builder()
                 .setModelFileName(TFOD_MODEL_FILE)
-                //.setModelAssetName(TFOD_MODEL_ASSET)
-
-                //.setModelLabels(LABELS)
-                //.setIsModelTensorFlow2(true)
-                //.setIsModelQuantized(true)
-                //.setModelInputSize(300)
-                //.setModelAspectRatio(16.0 / 9.0)
-
+                .setModelLabels(LABELS)
                 .build();
 
-        // Create the vision portal by using a builder.
+        // Creați portalul de viziune utilizând un constructor.
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
-        // Set the camera (webcam vs. built-in RC phone camera).
+        // Setează camera (webcam sau camera RC încorporată).
         if (USE_WEBCAM) {
             builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
         } else {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }
 
-        // Choose a camera resolution. Not all cameras support all resolutions.
+        // Alegeți o rezoluție a camerei. Nu toate camerele acceptă toate rezoluțiile.
         builder.setCameraResolution(new Size(640, 480));
 
-        // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
+        // Activare previzualizare RC (LiveView). Setează "false" pentru a omite monitorizarea camerei.
         builder.enableLiveView(true);
 
-        // Set the stream format; MJPEG uses less bandwidth than default YUY2.
+        // Setează formatul fluxului; MJPEG consumă mai puțină lățime de bandă decât YUY2 implicit.
         builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
 
-        // Choose whether or not LiveView stops if no processors are enabled.
-        // If set "true", monitor shows solid orange screen if no processors enabled.
-        // If set "false", monitor shows camera view without annotations.
+        // Alegeți dacă LiveView se oprește sau nu dacă nu există procesori activați.
+        // Dacă setat "true", monitorul afișează un ecran portocaliu solid dacă nu există procesori activați.
+        // Dacă setat "false", monitorul afișează imaginea camerei fără adnotări.
         builder.setAutoStopLiveView(false);
 
-        // Set and enable the processor.
+        // Setează și activează procesorul.
         builder.addProcessor(tfod);
 
-        // Build the Vision Portal, using the above settings.
+        // Construiește Vision Portal folosind setările de mai sus.
         visionPortal = builder.build();
 
-        // Set confidence threshold for TFOD recognitions, at any time.
+        // Setează pragul de încredere pentru recunoașterile TFOD, în orice moment.
         tfod.setMinResultConfidence(0.75f);
 
-        // Disable or re-enable the TFOD processor at any time.
+        // Dezactivează sau re-activează procesorul TFOD în orice moment.
         visionPortal.setProcessorEnabled(tfod, true);
 
-    }   // end method initTfod()
+    }   // sfârșit metoda initTfod()
 
-    /**
-     * Add telemetry about TensorFlow Object Detection (TFOD) recognitions.
-     */
     private void telemetryTfod() {
 
         List<Recognition> currentRecognitions = tfod.getRecognitions();
-        telemetry.addData("# Objects Detected", currentRecognitions.size());
+        telemetry.addData("# Obiecte Detectate", currentRecognitions.size());
 
         for (Recognition recognition : currentRecognitions) {
             double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
             double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
 
             telemetry.addData(""," ");
-            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-            telemetry.addData("- Position", "%.0f / %.0f", x, y);
-            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+            telemetry.addData("Imagine", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Poziție", "%.0f / %.0f", x, y);
+            telemetry.addData("- Dimensiune", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
         }
+    }
+
+    private void processConePosition() {
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            double relativePosition = x - 320;
+
+            String conePosition = determineConePosition(relativePosition);
+
+            telemetry.addData("Poziția Conului", conePosition);
+
+            // Planifică o traiectorie în funcție de poziția conului
+            planTrajectory(conePosition);
+
+            // Executează traiectoria
+            drive.followTrajectoryAsync(trajectory);
+
+            lastDetectionTime = System.currentTimeMillis();
+        }
+    }
+
+    private String determineConePosition(double relativePosition) {
+        // Definiți pozițiile celor trei benzi (stânga, mijloc, dreapta) în raport cu centrul vederii camerei.
+        double LEFT_STRIP_POSITION = -100; // Ajustați în funcție de dimensiunile robotului dvs.
+        double RIGHT_STRIP_POSITION = 100; // Ajustați în funcție de dimensiunile robotului dvs.
+
+        if (relativePosition < LEFT_STRIP_POSITION) {
+            return "Stânga";
+        } else if (LEFT_STRIP_POSITION <= relativePosition && relativePosition <= RIGHT_STRIP_POSITION) {
+            return "Mijloc";
+        } else {
+            return "Dreapta";
+        }
+    }
+
+    private Trajectory trajectory;
+
+    private void planTrajectory(String conePosition) {
+        // Planificați traiectoria în funcție de poziția conului
+        Pose2d startPose = drive.getPoseEstimate();
+        TrajectoryBuilder builder = drive.trajectoryBuilder(startPose);
+
+        if (conePosition.equals("Stânga")) {
+            builder.lineToLinearHeading(new Pose2d(12, 24, Math.toRadians(90)));
+        } else if (conePosition.equals("Dreapta")) {
+            builder.lineToLinearHeading(new Pose2d(12, -24, Math.toRadians(-90)));
+        } else {
+            builder.forward(12);
+        }
+
+        trajectory = builder.build();
     }
 }

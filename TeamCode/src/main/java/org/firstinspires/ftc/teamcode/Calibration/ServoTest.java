@@ -18,17 +18,18 @@ public class ServoTest extends OpMode
     public void init()
     {
 
+
         ServoStanga = hardwareMap.get(Servo.class, "ServoStanga");
-        ServoDreapta = hardwareMap.get(Servo.class, "ServoDreapta)");
+        ServoDreapta = hardwareMap.get(Servo.class, "ServoDreapta");
 
     }
 
     @Override
     public void loop()
     {
-
-            ServoStanga.setPosition(targetstanga);
-            ServoDreapta.setPosition(targetdreapta);
+        ServoDreapta.setPosition(targetdreapta);
+//            ServoStanga.setPosition(targetstanga);
+//            ServoDreapta.setPosition(targetdreapta);
 
 
         //telemetry.addData("PosServoStanga ", XXX);

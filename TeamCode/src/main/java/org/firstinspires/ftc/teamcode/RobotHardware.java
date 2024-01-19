@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,7 +15,8 @@ public class RobotHardware {
     public DcMotorEx
             leftFront,leftRear,
             rightRear,rightFront,
-            LiftDreapta,LiftStanga;
+            Lift;
+            //LiftDreapta,LiftStanga;
     public Servo
             ServoStanga, ServoDreapta;
     double closeClaw = 0.0,openClaw = 0.0;
@@ -39,25 +41,33 @@ public class RobotHardware {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightRear.setDirection(DcMotor.Direction.FORWARD);
 
         //endregion
 
         //region MotoareLift
-        LiftStanga = hardwareMap.get(DcMotorEx.class, "LiftStanga");
-        LiftDreapta = hardwareMap.get(DcMotorEx.class, "LiftDreapta");
+        Lift = hardwareMap.get(DcMotorEx.class, "Lift");
 
-        LiftStanga.setDirection(DcMotor.Direction.FORWARD);
-        LiftDreapta.setDirection(DcMotor.Direction.FORWARD);
+        //LiftStanga = hardwareMap.get(DcMotorEx.class, "LiftStanga");
+        //LiftDreapta = hardwareMap.get(DcMotorEx.class, "LiftDreapta");
 
-        LiftStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LiftDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Lift.setDirection(DcMotorEx.Direction.FORWARD);
 
-        LiftStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LiftDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        LiftStanga.setDirection(DcMotor.Direction.FORWARD);
+//        LiftDreapta.setDirection(DcMotor.Direction.FORWARD);
+
+         Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+//        LiftStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        LiftDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+          Lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+//        LiftStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        LiftDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //endregion
 
@@ -114,16 +124,10 @@ public class RobotHardware {
         final double v3 = (r * Math.sin(robotAngle)) + Turn;
         final double v4 = (r * Math.cos(robotAngle)) - Turn;
 
-        double joystickAngle = Math.atan2(gamepad.right_stick_y, gamepad.right_stick_x);
-        double joystickPower = Math.hypot(gamepad.right_stick_x, gamepad.right_stick_y);
-
-        double frontPower = joystickPower * Math.cos(robotAngle - joystickAngle);
-        double rearPower = joystickPower * Math.sin(robotAngle - joystickAngle);
-
-        leftFront.setPower(frontPower + Turn);
-        rightFront.setPower(rearPower - Turn);
-        leftRear.setPower(rearPower + Turn);
-        rightRear.setPower(frontPower - Turn);
+        leftFront.setPower(v1);
+        rightFront.setPower(v2);
+        leftRear.setPower(v3);
+        rightRear.setPower(v4);
     }
 
     public void LiftPID(Gamepad gamepad){
@@ -151,18 +155,20 @@ public class RobotHardware {
             manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.7;
 
         pidController.setPID(kp, ki, kd);
-        int armPos = LiftStanga.getCurrentPosition();
+        int armPos = Lift.getCurrentPosition();
         double pid = pidController.calculate(armPos, liftTarget);
         double pidPower = pid + ff;
         if(manualControl)
         {
-            LiftDreapta.setPower(manualPower);
-            LiftStanga.setPower(manualPower);
+            Lift.setPower(manualPower);
+//            LiftDreapta.setPower(manualPower);
+//            LiftStanga.setPower(manualPower);
         }
         else
         {
-            LiftDreapta.setPower(pidPower);
-            LiftStanga.setPower(pidPower);
+            Lift.setPower(pidPower);
+//            LiftDreapta.setPower(pidPower);
+//            LiftStanga.setPower(pidPower);
         }
     }
     public void setLiftTarget(int pos)
@@ -189,13 +195,15 @@ public class RobotHardware {
 
     public int getLiftLeftPosition()
     {
-        return LiftStanga.getCurrentPosition();
+        return Lift.getCurrentPosition();
+//        return LiftStanga.getCurrentPosition();
     }
 
-    public int getLiftRightPosition()
-    {
-        return LiftDreapta.getCurrentPosition();
-    }
+//    public int getLiftRightPosition()
+//    {
+//        return Lift.getCurrentPosition();
+////        return LiftDreapta.getCurrentPosition();
+//    }
 
     public int getLiftTarget()
     {
@@ -204,6 +212,7 @@ public class RobotHardware {
 
     public double getLiftPower()
     {
-        return LiftDreapta.getPower();
+        return Lift.getPower();
+//        return LiftDreapta.getPower();
     }
 }

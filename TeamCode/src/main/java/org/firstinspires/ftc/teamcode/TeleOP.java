@@ -29,8 +29,8 @@ public class TeleOP extends LinearOpMode {
             robot.ClawManager(gamepad2);
 
 
-            telemetry.addData("Lift Position Right", robot.getLiftRightPosition());
-            telemetry.addData("Lift Position Left", robot.getLiftLeftPosition());
+            telemetry.addData("Lift Position", robot.getLiftLeftPosition());
+//            telemetry.addData("Lift Position Left", robot.getLiftLeftPosition());
             telemetry.addData("Lift Target", robot.getLiftTarget());
             telemetry.addData("Lift Power", robot.getLiftPower());
 
