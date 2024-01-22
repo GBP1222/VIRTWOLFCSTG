@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -35,7 +36,7 @@ public class TFMiscare extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        drive = new SampleMecanumDrive(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         initTfod();
 
@@ -147,8 +148,8 @@ public class TFMiscare extends LinearOpMode {
             planTrajectory(conePosition);
 
             // Executează traiectoria
-            drive.followTrajectoryAsync(trajectory);
-        }
+            //
+            }
     }
 
     private String determineConePosition(double relativePosition) {
@@ -169,17 +170,20 @@ public class TFMiscare extends LinearOpMode {
 
     private void planTrajectory(String conePosition) {
         // Planificați traiectoria în funcție de poziția conului
+        telemetry.addLine("PING");
         Pose2d startPose = drive.getPoseEstimate();
         TrajectoryBuilder builder = drive.trajectoryBuilder(startPose);
 
+        Trajectory parcare = null;
+
         if (conePosition.equals("Stânga")) {
-            builder.lineToLinearHeading(new Pose2d(12, 24, Math.toRadians(90)));
+            parcare = builder.forward(12).build();
         } else if (conePosition.equals("Dreapta")) {
-            builder.lineToLinearHeading(new Pose2d(12, -24, Math.toRadians(-90)));
-        } else {
-            builder.forward(12);
+            parcare = builder.forward(12).build();
+        } else if (conePosition.equals("Mijloc")){
+            parcare = builder.forward(12).build();
         }
 
-        trajectory = builder.build();
+        drive.followTrajectoryAsync(parcare);
     }
 }
