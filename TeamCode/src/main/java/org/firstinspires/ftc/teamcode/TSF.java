@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -44,7 +45,8 @@ public class TSF extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) auto_case = processConePosition();
 
-        TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
+        TrajectorySequence left = drive.trajectorySequenceBuilder(new Pose2d(-38.68, -62.90, Math.toRadians(90.00)))
+                .splineTo(new Vector2d(-36.04, -33.98), Math.toRadians(81.13))
                 .build();
 
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici

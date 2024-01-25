@@ -18,14 +18,17 @@ public class RobotHardware {
             Lift;
             //LiftDreapta,LiftStanga;
     public Servo
-            ServoStanga, ServoDreapta;
-    double closeClaw = 0.0,openClaw = 0.0;
+            ServoStanga, ServoDreapta,
+            GhearaStanga, GhearaDreapta,
+            GhearaInclinatie;
+
+    double closeClaw = 0.5,openClaw = 0;
     boolean buttonIsPressed = false, toggleClaw = false;
     public double pid;
     boolean manualControl=false;
     PIDController pidController = new PIDController(0, 0, 0);
 
-    public static double kp = 0.1, ki = 0, kd = 0.001, ff = 0.1;
+    public static double kp = 0, ki = 0, kd = 0, ff = 0;
     public static int liftTarget = 0;
 
     int high = 0, medium = 0, low = 0;
@@ -80,6 +83,16 @@ public class RobotHardware {
         ServoStanga.setDirection(Servo.Direction.FORWARD);
         ServoDreapta.setDirection(Servo.Direction.FORWARD);
 
+        GhearaStanga = hardwareMap.get(Servo.class, "GhearaStanga");
+        GhearaDreapta = hardwareMap.get(Servo.class, "GhearaDreapta");
+
+        GhearaStanga.setDirection(Servo.Direction.FORWARD);
+        GhearaDreapta.setDirection(Servo.Direction.REVERSE);
+
+        GhearaInclinatie = hardwareMap.get(Servo.class, "GhearaInclinatie");
+
+        GhearaInclinatie.setDirection(Servo.Direction.FORWARD);
+
         //endregion
 
         //LynxBulkCachingMode
@@ -89,8 +102,8 @@ public class RobotHardware {
 
     public void ClawState(double pos)
     {
-        ServoStanga.setPosition(pos);
-        ServoDreapta.setPosition(pos);
+        GhearaStanga.setPosition(pos);
+        GhearaDreapta.setPosition(pos);
     }
 
     public void CloseClaw()
