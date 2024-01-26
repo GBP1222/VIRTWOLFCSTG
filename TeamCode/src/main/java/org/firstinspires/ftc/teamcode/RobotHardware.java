@@ -15,10 +15,9 @@ public class RobotHardware {
     public DcMotorEx
             leftFront,leftRear,
             rightRear,rightFront,
-            Lift;
-            //LiftDreapta,LiftStanga;
+            Lift,
+            BratDreapta,BratStanga;
     public Servo
-            ServoStanga, ServoDreapta,
             GhearaStanga, GhearaDreapta,
             GhearaInclinatie;
 
@@ -30,6 +29,7 @@ public class RobotHardware {
 
     public static double kp = 0, ki = 0, kd = 0, ff = 0;
     public static int liftTarget = 0;
+    public static int BratTarget = 0;
 
     int high = 0, medium = 0, low = 0;
 
@@ -56,32 +56,27 @@ public class RobotHardware {
         //region MotoareLift
         Lift = hardwareMap.get(DcMotorEx.class, "Lift");
 
-        //LiftStanga = hardwareMap.get(DcMotorEx.class, "LiftStanga");
-        //LiftDreapta = hardwareMap.get(DcMotorEx.class, "LiftDreapta");
+        BratStanga = hardwareMap.get(DcMotorEx.class, "BratStanga");
+        BratDreapta = hardwareMap.get(DcMotorEx.class, "BratDreapta");
 
         Lift.setDirection(DcMotorEx.Direction.FORWARD);
 
-//        LiftStanga.setDirection(DcMotor.Direction.FORWARD);
-//        LiftDreapta.setDirection(DcMotor.Direction.FORWARD);
+        BratStanga.setDirection(DcMotor.Direction.FORWARD);
+        BratDreapta.setDirection(DcMotor.Direction.FORWARD);
 
          Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        LiftStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        LiftDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BratStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BratDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
           Lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-//        LiftStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        LiftDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BratStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BratDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //endregion
 
         //region ServoGheara
-        ServoStanga = hardwareMap.get(Servo.class, "ServoStanga");
-        ServoDreapta = hardwareMap.get(Servo.class, "ServoDreapta");
-
-        ServoStanga.setDirection(Servo.Direction.FORWARD);
-        ServoDreapta.setDirection(Servo.Direction.FORWARD);
 
         GhearaStanga = hardwareMap.get(Servo.class, "GhearaStanga");
         GhearaDreapta = hardwareMap.get(Servo.class, "GhearaDreapta");
@@ -188,25 +183,48 @@ public class RobotHardware {
         }
     }
 
-    public void InitBratLift() {
-        ServoStanga.setPosition(0);
-        ServoDreapta.setPosition(1);
+
+    public void BratPID(Gamepad gamepad){
+
+//        double manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.5;
+//
+//        if(gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
+//            manualControl=true;
+//        if(gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
+//            manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.7;
+
+        pidController.setPID(kp, ki, kd);
+
+        int armPos = BratStanga.getCurrentPosition();
+        double pid = pidController.calculate(armPos, BratTarget);
+        double pidPower = pid + ff;
+
+            BratDreapta.setPower(pidPower);
+            BratStanga.setPower(pidPower);
+//            LiftDreapta.setPower(pidPower);
+//            LiftStanga.setPower(pidPower)
+
     }
 
-    public void ArmPos(Gamepad gamepad)  {
-        if(gamepad.a) {
-            ServoStanga.setPosition(0);
-            ServoDreapta.setPosition(1);
-        }
-        if(gamepad.b) {
-            ServoStanga.setPosition(1);
-            ServoDreapta.setPosition(0);
-        }
-        if(gamepad.y) {
-            ServoStanga.setPosition(0.8);
-            ServoDreapta.setPosition(0.2);
-        }
-    }
+//    public void InitBratLift() {
+//        ServoStanga.setPosition(0);
+//        ServoDreapta.setPosition(1);
+//    }
+//
+//    public void ArmPos(Gamepad gamepad)  {
+//        if(gamepad.a) {
+//            ServoStanga.setPosition(0);
+//            ServoDreapta.setPosition(1);
+//        }
+//        if(gamepad.b) {
+//            ServoStanga.setPosition(1);
+//            ServoDreapta.setPosition(0);
+//        }
+//        if(gamepad.y) {
+//            ServoStanga.setPosition(0.8);
+//            ServoDreapta.setPosition(0.2);
+//        }
+//    }
 
     public void setLiftTarget(int pos)
     {

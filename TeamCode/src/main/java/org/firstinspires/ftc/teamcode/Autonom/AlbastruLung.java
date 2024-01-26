@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.List;
 
-// AUTONOM ALBASTRU LUNG TABLOU IN DREAPTA
+// AUTONOM ALBASTRU LUNG TABLOU IN STANGA
 @TeleOp(name = "AUTONOM ALBASTRU LUNG")
 public class AlbastruLung extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime();
@@ -37,6 +38,8 @@ public class AlbastruLung extends LinearOpMode {
     public void runOpMode() {
 
         drive = new SampleMecanumDrive(hardwareMap);
+        RobotHardware robot = new RobotHardware(hardwareMap);
+
         initTfod();
         telemetryTfod();
 
@@ -49,9 +52,19 @@ public class AlbastruLung extends LinearOpMode {
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
                 .splineTo(new Vector2d(-33.48, 31.74), Math.toRadians(-1.47))
                 //lasa pixelu
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                                                          // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
                 .splineTo(new Vector2d(-19.16, 34.26), Math.toRadians(0.00))
                 .splineTo(new Vector2d(47.81, 34.84), Math.toRadians(0.00))
                 //lasa pixelu pe tablou
+                //muta bratu de tot in fata
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                                                            // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
+                //muta bratu inapoi
                 .splineTo(new Vector2d(48.00, 31.55), Math.toRadians(270.00))
                 .splineTo(new Vector2d(48.39, 11.81), Math.toRadians(-88.59))
                 .splineTo(new Vector2d(50.71, 11.81), Math.toRadians(0.00))
@@ -62,9 +75,19 @@ public class AlbastruLung extends LinearOpMode {
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
                 .splineTo(new Vector2d(-36.19, 33.10), Math.toRadians(270.00))
                 //lasa pixelu
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
                 .splineTo(new Vector2d(-32.90, 32.90), Math.toRadians(-2.16))
                 .splineTo(new Vector2d(49.55, 33.87), Math.toRadians(0.67))
                 //lasa pixelu pe tablou
+                //muta bratu de tot in fata
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
+                //muta bratu inapoi
                 .splineTo(new Vector2d(49.55, 30.97), Math.toRadians(270.00))
                 .splineTo(new Vector2d(48.58, 13.16), Math.toRadians(266.89))
                 .splineTo(new Vector2d(51.10, 12.58), Math.toRadians(0.00))
@@ -75,9 +98,19 @@ public class AlbastruLung extends LinearOpMode {
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
                 .splineTo(new Vector2d(-47.94, 41.49), Math.toRadians(-84.05))
                 //lasa pixelu prima banda
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
                 .splineTo(new Vector2d(-14.32, 34.45), Math.toRadians(0.00))
                 .splineTo(new Vector2d(48.39, 34.45), Math.toRadians(0.00))
                 //lasa pixelu pe tablou
+                //muta bratu de tot in fata
+                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
+                // trebuie functie pt fiecare parte din gheara :0
+                .waitSeconds(0.01)
+                .addTemporalMarker(() -> robot.CloseClaw())
+                //muta bratu inapoi
                 .splineTo(new Vector2d(48.58, 31.55), Math.toRadians(-87.74))
                 .splineTo(new Vector2d(49.16, 12.58), Math.toRadians(-88.25))
                 .splineTo(new Vector2d(51.48, 12.39), Math.toRadians(-4.76))

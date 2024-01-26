@@ -26,7 +26,7 @@ public class TeleOP extends LinearOpMode {
         {
 
             robot.LiftPID(gamepad2);
-            robot.ArmPos(gamepad2);
+            robot.BratPID(gamepad2);
             robot.DriveMovement(gamepad1);
             robot.ClawManager(gamepad2);
 
