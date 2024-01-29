@@ -17,8 +17,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name="RoadRunnerStanga")
-public class AutoLeft extends LinearOpMode
+@Autonomous(name="RoadRunnerDreapta")
+public class AutoRight extends LinearOpMode
 {
 
     @Override
@@ -34,6 +34,7 @@ public class AutoLeft extends LinearOpMode
         robot.setLiftTarget(0);
         robot.setBratTarget(0);
         robot.RetractClaw();
+        robot.OpenClaw();
 
         drive.setPoseEstimate(startPose);
 
@@ -45,13 +46,13 @@ public class AutoLeft extends LinearOpMode
                 //preload
 //                .forward(1)
 //                .waitSeconds(1)
-//                .turn(Math.toRadians(90.0))
+//                .turn(Math.toRadians(-90.0))
 //                .waitSeconds(0.1)
-                .strafeLeft(2.5)
+                .forward(55)
 
                 .build();
 
-            drive.followTrajectorySequenceAsync(parcare1);
+        drive.followTrajectorySequenceAsync(parcare1);
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
@@ -62,4 +63,4 @@ public class AutoLeft extends LinearOpMode
 
 
 
-}   
+}

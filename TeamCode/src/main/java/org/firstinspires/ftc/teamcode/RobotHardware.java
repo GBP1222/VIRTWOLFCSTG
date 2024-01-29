@@ -13,25 +13,30 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class RobotHardware {
     public DcMotorEx
-            leftFront,leftRear,
-            rightRear,rightFront,
+            leftFront, leftRear,
+            rightRear, rightFront,
             Lift,
-            BratDreapta,BratStanga;
+            BratDreapta, BratStanga;
     public Servo
             GhearaStanga, GhearaDreapta,
-            GhearaInclinatie;
+            GhearaInclinatie, Drona;
 
-    double closeClaw = 0.5,openClaw = 0;
-    boolean buttonIsPressed = false, toggleClaw = false;
+    double closeClaw = 0.5, openClaw = 0;
+    double InclineClawRetract = -1;
+    double InclineClawParallel = 0.8;
+    boolean buttonIsPressed = false, toggleClaw = false, button2IsPressed = false, toggleInclineClaw = false, toggleDrone = false, button3IsPressed = false;
     public double pid;
-    boolean manualControl=false;
+    boolean manualControl = false;
     PIDController pidController = new PIDController(0, 0, 0);
 
-    public static double kp = 0, ki = 0, kd = 0, ff = 0;
+    public static double kpLIFT = 0, kiLIFT = 0, kdLIFT = 0, ffLIFT = 0;
     public static int liftTarget = 0;
+    public static double kpBRAT = 0.1, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0.3;
     public static int BratTarget = 0;
 
     int high = 0, medium = 0, low = 0;
+    double InitDrone = 0.5;
+    int LaunchPos = 1;
 
     public RobotHardware(HardwareMap hardwareMap) {
 
@@ -64,12 +69,12 @@ public class RobotHardware {
         BratStanga.setDirection(DcMotor.Direction.FORWARD);
         BratDreapta.setDirection(DcMotor.Direction.FORWARD);
 
-         Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         BratStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BratDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-          Lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         BratStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BratDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -81,12 +86,18 @@ public class RobotHardware {
         GhearaStanga = hardwareMap.get(Servo.class, "GhearaStanga");
         GhearaDreapta = hardwareMap.get(Servo.class, "GhearaDreapta");
 
+        Drona = hardwareMap.get(Servo.class, "Drona");
+
         GhearaStanga.setDirection(Servo.Direction.FORWARD);
         GhearaDreapta.setDirection(Servo.Direction.REVERSE);
+
+        Drona.setDirection(Servo.Direction.FORWARD);
 
         GhearaInclinatie = hardwareMap.get(Servo.class, "GhearaInclinatie");
 
         GhearaInclinatie.setDirection(Servo.Direction.FORWARD);
+
+
 
         //endregion
 
@@ -95,35 +106,63 @@ public class RobotHardware {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
     }
 
-    public void ClawState(double pos)
-    {
+    public void RetractClaw() {
+        InclineClawState(InclineClawRetract);
+    }
+
+    public void ParallelClaw() {
+        InclineClawState(InclineClawParallel);
+    }
+
+
+    public void ClawStateIndivi(double pos,boolean stg) {
+        if(stg)
+        GhearaStanga.setPosition(pos);
+        else
+        GhearaDreapta.setPosition(pos);
+    }
+
+
+    public void ClawState(double pos) {
         GhearaStanga.setPosition(pos);
         GhearaDreapta.setPosition(pos);
     }
 
-    public void CloseClaw()
-    {
+    public void InitDrone() {
+        Drona.setPosition(InitDrone);
+    }
+
+    public void LaunchDrone() {
+        Drona.setPosition(LaunchPos);
+    }
+
+    public void InclineClawState(double pos) {
+        GhearaInclinatie.setPosition(pos);
+    }
+
+    public void CloseClaw() {
         ClawState(closeClaw);
     }
 
-    public void OpenClaw()
-    {
+    public void OpenClaw() {
         ClawState(openClaw);
     }
 
-    public void DriveMovement(Gamepad gamepad)
-    {
+//    public void Drone(Gamepad gamepad) {
+//        if(gamepad.y)
+//            LaunchDrone();
+//    }
+
+    public void DriveMovement(Gamepad gamepad) {
         double Forward = -gamepad.left_stick_y;
         double Strafe = gamepad.left_stick_x;
         double Turn = gamepad.right_stick_x;
 
-        if(!gamepad.left_bumper)
-        {
+        if (!gamepad.left_bumper) {
             Strafe /= 2;
             Forward /= 2;
         }
-        if(!gamepad.right_bumper)
-        {
+        if (!gamepad.right_bumper) {
             Turn /= 2;
         }
         double r = Math.hypot(Strafe, Forward);
@@ -134,6 +173,7 @@ public class RobotHardware {
         final double v2 = (r * Math.sin(robotAngle)) - Turn;
         final double v3 = (r * Math.sin(robotAngle)) + Turn;
         final double v4 = (r * Math.cos(robotAngle)) - Turn;
+    //v1,v2,v3,v4
 
         leftFront.setPower(v1);
         rightFront.setPower(v2);
@@ -141,68 +181,94 @@ public class RobotHardware {
         rightRear.setPower(v4);
     }
 
-    public void LiftPID(Gamepad gamepad){
-        if(gamepad.dpad_up)
-        {
-            setLiftTarget(high);
-            manualControl = false;
-        }
-        else if(gamepad.dpad_left)
-        {
-            setLiftTarget(medium);
-            manualControl = false;
-        }
-        else if(gamepad.dpad_down)
-        {
-            setLiftTarget(low);
-            manualControl = false;
-        }
+    public void LiftPID(Gamepad gamepad) {
 
-        double manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.5;
-
+        double ManualLiftPower = (gamepad.left_trigger-gamepad.right_trigger+ffLIFT)*0.5;
         if(gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
-            manualControl=true;
+            manualControl = true;
         if(gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
-            manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.7;
+            ManualLiftPower = (gamepad.left_trigger-gamepad.right_trigger+ffLIFT)*0.7;
 
-        pidController.setPID(kp, ki, kd);
-        int armPos = Lift.getCurrentPosition();
-        double pid = pidController.calculate(armPos, liftTarget);
-        double pidPower = pid + ff;
-        if(manualControl)
-        {
-            Lift.setPower(manualPower);
+        pidController.setPID(kpLIFT, kiLIFT, kdLIFT);
+        int LiftPos = Lift.getCurrentPosition();
+        double pid = pidController.calculate(LiftPos, liftTarget);
+        double pidPowerLIFT = pid + ffLIFT;
+
+        if (manualControl) {
+            Lift.setPower(ManualLiftPower);
 //            LiftDreapta.setPower(manualPower);
 //            LiftStanga.setPower(manualPower);
-        }
-        else
-        {
-            Lift.setPower(pidPower);
+        } else {
+            Lift.setPower(pidPowerLIFT);
 //            LiftDreapta.setPower(pidPower);
 //            LiftStanga.setPower(pidPower);
         }
     }
 
 
-    public void BratPID(Gamepad gamepad){
+    public void BratPID(Gamepad gamepad) {
 
-//        double manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.5;
+//        double manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.5;
 //
-//        if(gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
-//            manualControl=true;
-//        if(gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
-//            manualPower = (gamepad.left_trigger-gamepad.right_trigger+ff)*0.7;
+//        if (gamepad.left_stick_y > 0.1 || gamepad.right_stick_y > 0.1)
+//            manualControl = true;
+//        if (gamepad.left_stick_y > 0.9 || gamepad.right_stick_y > 0.9)
+//            manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.7;
 
-        pidController.setPID(kp, ki, kd);
+//       double manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.2;
+//
+//        if (gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
+//            manualControl = true;
+//        if (gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
+//            manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.5;
+
+        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
 
         int armPos = BratStanga.getCurrentPosition();
         double pid = pidController.calculate(armPos, BratTarget);
-        double pidPower = pid + ff;
+        double pidPowerBrat = pid + ffBRAT;
 
-            BratDreapta.setPower(pidPower);
-            BratStanga.setPower(pidPower);
-//            LiftDreapta.setPower(pidPower);
-//            LiftStanga.setPower(pidPower)
+        BratDreapta.setPower(pidPowerBrat);
+        BratStanga.setPower(pidPowerBrat);
+
+        if(gamepad.dpad_up)
+            BratTarget = BratTarget + 1;
+        if(gamepad.dpad_down)
+            BratTarget = BratTarget - 1;
+
+//        if (manualControl) {
+//            BratDreapta.setPower(manualArmPower);
+//            BratStanga.setPower(manualArmPower);
+//        }
+//        else {
+//            BratDreapta.setPower(pidPowerBrat);
+//            BratStanga.setPower(pidPowerBrat);
+//        }
+
+    }
+    public void DroneManager(Gamepad gamepad) {
+        if (gamepad.y && !button3IsPressed) {
+            if (toggleDrone)
+                Drona.setPosition(InitDrone);
+            else
+                Drona.setPosition(LaunchPos);
+            button3IsPressed = true;
+            toggleDrone = !toggleDrone;
+        } else if (!gamepad.y)
+            button3IsPressed = false;
+    }
+
+    public void InclineClawManager(Gamepad gamepad) {
+
+        if (gamepad.right_bumper && !button2IsPressed) {
+            if (toggleInclineClaw)
+                InclineClawState(InclineClawRetract);
+            else
+                InclineClawState(InclineClawParallel);
+            button2IsPressed = true;
+            toggleInclineClaw = !toggleInclineClaw;
+        } else if (!gamepad.right_bumper)
+            button2IsPressed = false;
 
     }
 
@@ -226,32 +292,63 @@ public class RobotHardware {
 //        }
 //    }
 
-    public void setLiftTarget(int pos)
-    {
+    public void setLiftTarget(int pos) {
         liftTarget = pos;
     }
 
-    public void ClawManager(Gamepad gamepad)
-    {
+    public void setBratTarget(int pos) {
+        BratTarget = pos;
+    }
 
-        if(gamepad.x && !buttonIsPressed)
-        {
-            if(toggleClaw)
+    public void ClawManager(Gamepad gamepad) {
+
+        if (gamepad.x && !buttonIsPressed) {
+            if (toggleClaw)
                 ClawState(closeClaw);
             else
                 ClawState(openClaw);
             buttonIsPressed = true;
-            toggleClaw =! toggleClaw;
-        }
-        else if(!gamepad.x)
+            toggleClaw = !toggleClaw;
+        } else if (!gamepad.x)
             buttonIsPressed = false;
 
     }
 
-    public int getLiftLeftPosition()
-    {
+    public void ClawStanga(Gamepad gamepad) {
+
+        if (gamepad.x && !buttonIsPressed) {
+            if (toggleClaw)
+                ClawStateIndivi(closeClaw, true);
+            else
+                ClawStateIndivi(openClaw, true);
+            buttonIsPressed = true;
+            toggleClaw = !toggleClaw;
+        } else if (!gamepad.x)
+            buttonIsPressed = false;
+
+    }
+
+    public void ClawDreapta(Gamepad gamepad) {
+
+        if (gamepad.b && !buttonIsPressed) {
+            if (toggleClaw)
+                ClawStateIndivi(closeClaw,false);
+            else
+                ClawStateIndivi(openClaw,false);
+            buttonIsPressed = true;
+            toggleClaw = !toggleClaw;
+        } else if (!gamepad.b)
+            buttonIsPressed = false;
+
+    }
+
+    public int getLiftLeftPosition() {
         return Lift.getCurrentPosition();
 //        return LiftStanga.getCurrentPosition();
+    }
+
+    public int getArmPosition() {
+        return BratStanga.getCurrentPosition();
     }
 
 //    public int getLiftRightPosition()
@@ -260,14 +357,22 @@ public class RobotHardware {
 ////        return LiftDreapta.getCurrentPosition();
 //    }
 
-    public int getLiftTarget()
-    {
-        return liftTarget;
+    public int getArmTarget() {
+        return BratTarget;
     }
 
-    public double getLiftPower()
-    {
-        return Lift.getPower();
+        public int getLiftTarget ()
+        {
+            return liftTarget;
+        }
+        public double getArmPower() {
+            return BratStanga.getPower();
+        }
+
+        public double getLiftPower ()
+        {
+            return Lift.getPower();
 //        return LiftDreapta.getPower();
+        }
     }
-}
+
