@@ -96,8 +96,7 @@ import java.util.Locale;
  * The BNO055 product page: https://www.bosch-sensortec.com/bst/products/all_products/bno055
  * The BNO055 datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bno055-ds000.pdf
  */
-@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
-@Disabled                            // Uncomment this to add to the OpMode list
+@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor") // Uncomment this to add to the OpMode list
 public class SensorBNO055IMUCalibration extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -169,6 +168,7 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
                 }
             }
 
+
             telemetry.update();
         }
     }
@@ -176,7 +176,8 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
     void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
+        // from the IMU that we will then display i
+        // n separate lines.
         telemetry.addAction(new Runnable() { @Override public void run()
                 {
                 // Acquiring the angles is relatively expensive; we don't want
@@ -184,6 +185,7 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
                 // three times the necessary expense.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 }
+
             });
 
         telemetry.addLine()
