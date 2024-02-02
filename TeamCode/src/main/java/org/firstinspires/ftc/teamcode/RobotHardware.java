@@ -130,7 +130,7 @@ public class RobotHardware {
 
 
     public void ClawStateIndivi(double pos,boolean stg) {
-        if(stg)
+            if(stg)
         GhearaStanga.setPosition(pos);
         else
         GhearaDreapta.setPosition(pos);
@@ -291,6 +291,17 @@ public class RobotHardware {
 //        if (gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
 //            manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.5;
 
+        /*
+            double currPosInTicks = armMotor.getCurrentPosition();
+            double ff = ffBRAT * Math.sin(Math.toRadians(ticksToRealWorldDegrees(currPosInTicks)));
+            public double ticksToRealWorldDegrees(double ticks)
+            {
+                return ticks / ticksPerDegree + zeroOffset;
+            }
+            double power = pidOutput + ff;
+            power = Range.clip(power, -powerLimit, powerLimit);
+         */
+
         pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
 
         int armPos = BratStanga.getCurrentPosition();
@@ -306,7 +317,7 @@ public class RobotHardware {
             BratTarget = BratTarget - 1;
 
 //        if (manualControl) {
-//            BratDreapta.setPower(manualArmPower);
+//            BratDreapt a.setPower(manualArmPower);
 //            BratStanga.setPower(manualArmPower);
 //        }
 //        else {
@@ -340,6 +351,7 @@ public class RobotHardware {
             button2IsPressed = false;
 
     }
+
 
 //    public void InitBratLift() {
 //        ServoStanga.setPosition(0);

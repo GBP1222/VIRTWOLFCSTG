@@ -13,21 +13,20 @@ public class DriveConstants {
     public static final double MAX_RPM = 312;
 
     public static final boolean RUN_USING_ENCODER = false;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
-            getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0, 0);
 
     public static double WHEEL_RADIUS = 1.88976; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 13.386; // in
+    public static double TRACK_WIDTH = 13.75; // in
 
     public static double kV = 0.017;
-    public static double kA = 0.002;
-    public static double kStatic = 0.0616;
+    public static double kA = 0.0028;
+    public static double kStatic = 0.06717;
 
     public static double MAX_VEL = 35;
     public static double MAX_ACCEL = 35;
-    public static double MAX_ANG_VEL = Math.toRadians(266.81309979683914);
-    public static double MAX_ANG_ACCEL = Math.toRadians(266.81309979683914);
+    public static double MAX_ANG_VEL = Math.toRadians(179.29359687045854); //199.0538199962894
+    public static double MAX_ANG_ACCEL = Math.toRadians(179.29359687045854);
 
 
     public static double encoderTicksToInches(double ticks) {
