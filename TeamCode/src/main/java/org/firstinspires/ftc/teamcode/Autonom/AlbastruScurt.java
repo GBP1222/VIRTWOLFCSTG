@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonom;
 import android.util.Size;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,8 +22,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import java.util.List;
 
 // AUTONOM ALBASTRU SCURT TABLOU IN STANGA
-@Disabled
-@TeleOp(name = "AUTONOM ALBASTRU SCURT")
+@Autonomous(name = "AUTONOM ALBASTRU SCURT")
 public class AlbastruScurt extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime();
     private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/modelCoroana.tflite";

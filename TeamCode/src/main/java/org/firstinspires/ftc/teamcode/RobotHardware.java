@@ -125,22 +125,19 @@ public class RobotHardware {
     }
 
     public void ParallelClaw() {
-        InclineClawState(InclineClawParallel);
-    }
+        InclineClawState(InclineClawParallel);}
 
 
     public void ClawStateIndivi(double pos,boolean stg) {
-            if(stg)
-        GhearaStanga.setPosition(pos);
+        if(stg)
+            GhearaStanga.setPosition(pos);
         else
-        GhearaDreapta.setPosition(pos);
-    }
+            GhearaDreapta.setPosition(pos);}
 
 
     public void ClawState(double pos) {
         GhearaStanga.setPosition(pos);
-        GhearaDreapta.setPosition(pos);
-    }
+        GhearaDreapta.setPosition(pos);}
 
     public void InitDrone() {
         Drona.setPosition(InitDrone);
@@ -394,7 +391,21 @@ public class RobotHardware {
             buttonIsPressed = false;
 
     }
+    public void openClawStanga(){
+        GhearaStanga.setPosition(openClaw);
+    }
 
+    public void openClawDreapta(){
+        GhearaDreapta.setPosition(openClaw);
+    }
+
+//    public void inclinaGheara(){
+//        GhearaInclinatie.setPosition(InclineClawParallel);
+//    }
+//
+//    public void retractGheara (){
+//        GhearaInclinatie.setPosition(0);
+//    }
     public void ClawStanga  (Gamepad gamepad) {
 
         if (gamepad.x && !buttonIsPressed) {
@@ -455,5 +466,42 @@ public class RobotHardware {
             return Lift.getPower();
 //        return LiftDreapta.getPower();
         }
+
+//    public void RetractClaw() {
+//        InclineClawState(InclineClawRetract);
+//    }
+//
+//    public void ParallelClaw() {
+//        InclineClawState(InclineClawParallel);}
+
+//    public void InclineClawState(double pos) {
+//        GhearaInclinatie.setPosition(pos);
+//    }
+
+    public void IndividualClawRightState(double pos) {
+        GhearaDreapta.setPosition(pos);
+    }
+
+    public void ClawRightOpen() {
+        IndividualClawRightState(closeClaw);
+    }
+
+    public void ClawRightClose() {
+        IndividualClawRightState(openClaw);
+    }
+
+    public void IndividualClawLeftState(double pos) {
+        GhearaStanga.setPosition(pos);
+    }
+
+    public void ClawLeftOpen() {
+        IndividualClawLeftState(closeClaw);
+    }
+
+    public void ClawLeftClose() {
+        IndividualClawLeftState(openClaw);
+    }
+
+
     }
 

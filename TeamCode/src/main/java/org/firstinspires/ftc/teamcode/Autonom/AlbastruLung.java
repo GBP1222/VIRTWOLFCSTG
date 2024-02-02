@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonom;
 import android.util.Size;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,8 +22,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import java.util.List;
 
 // AUTONOM ALBASTRU LUNG TABLOU IN STANGA
-@Disabled
-@TeleOp(name = "AUTONOM ALBASTRU LUNG")
+@Autonomous(name = "AUTONOM ALBASTRU LUNG")
 public class AlbastruLung extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime();
     private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/modelCoroana.tflite";
@@ -127,9 +127,12 @@ public class AlbastruLung extends LinearOpMode {
         else if(auto_case==3)
             drive.followTrajectorySequenceAsync(right);
 
+        telemetry.addData("caz ", auto_case);
+        telemetry.update();
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("caz ", auto_case);
             telemetry.update();
             drive.update();
             sleep(20);
