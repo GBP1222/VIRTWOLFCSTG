@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static com.qualcomm.robotcore.util.Range.clip;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -37,6 +39,8 @@ public class RobotHardware {
     public static double kpLIFT = 0, kiLIFT = 0, kdLIFT = 0, ffLIFT = 0;
     public static int liftTarget = 0;
     public static double kpBRAT = 0.1, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0.3;
+    private final double ZERO_OFFSET = 0;
+    public static double ticks_in_degrees = 288 / 180.0;
     public static int BratTarget = 0;
 
     int high = 0, medium = 0, low = 0;
@@ -305,6 +309,8 @@ public class RobotHardware {
         double pid = pidController.calculate(armPos, BratTarget);
         double pidPowerBrat = pid + ffBRAT;
 
+        pidPowerBrat = clip(pidPowerBrat, -0.5, 0.5);
+
         BratDreapta.setPower(pidPowerBrat);
         BratStanga.setPower(pidPowerBrat);
 
@@ -322,6 +328,17 @@ public class RobotHardware {
 //            BratStanga.setPower(pidPowerBrat);
 //        }
 
+    }
+    public void BratPID2(Gamepad gamepad){
+        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
+        int armPos = BratDreapta.getCurrentPosition();
+        double pid = pidController.calculate(armPos, BratTarget);
+        double ff = Math.sin(Math.toRadians(armPos / ticks_in_degrees + ZERO_OFFSET)) * ffBRAT;
+
+        double power = pid + ff;
+
+        BratStanga.setPower(power);
+        BratDreapta.setPower(power);
     }
     public void DroneManager(Gamepad gamepad) {
         if (gamepad.y && !button3IsPressed) {

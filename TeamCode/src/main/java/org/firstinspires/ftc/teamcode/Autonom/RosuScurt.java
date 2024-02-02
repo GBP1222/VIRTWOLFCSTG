@@ -31,7 +31,7 @@ public class RosuScurt extends LinearOpMode {
             "con",
     };
 
-    int auto_case = 2;
+    int auto_case;
     TfodProcessor tfod;
     VisionPortal visionPortal;
     SampleMecanumDrive drive;
@@ -41,83 +41,75 @@ public class RosuScurt extends LinearOpMode {
 
         drive = new SampleMecanumDrive(hardwareMap);
         RobotHardware robot = new RobotHardware(hardwareMap);
+
         initTfod();
         telemetryTfod();
 
-        Pose2d startPose = new Pose2d(7.20, -66.32, Math.toRadians(90.0)); // determina pozitia reala de start
+        Pose2d startPose = new Pose2d(15.05, -62.75, Math.toRadians(90.00)); // determina pozitia reala de start
 
         drive.setPoseEstimate(startPose);
 
+        robot.setLiftTarget(0);
+        robot.setBratTarget(0);
+        robot.RetractClaw();
+        robot.OpenClaw();
+        robot.InitDrone();
+
         while (!isStarted() && !isStopRequested()) auto_case = processConePosition();
 
-        TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(4.74, -40.17), Math.toRadians(122.28))
-                //lasa pixelu prima banda
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(7.20, -39.03), Math.toRadians(47.29))
-                .splineTo(new Vector2d(49.64, -35.43), Math.toRadians(0.00))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(49.26, -38.08), Math.toRadians(265.60))
-                .splineTo(new Vector2d(48.32, -61.77), Math.toRadians(267.71))
-                .splineTo(new Vector2d(50.59, -61.58), Math.toRadians(-6.01))
-                .splineTo(new Vector2d(61.77, -61.58), Math.toRadians(-1.85))
-                //parcare
+        telemetry.addData("Caz", auto_case);
+        telemetry.update();
+
+        TrajectorySequence left = drive.trajectorySequenceBuilder(new Pose2d(15.05, -62.75, Math.toRadians(90.00)))
+                .splineTo(new Vector2d(16.07, -48.37), Math.toRadians(95.90))
+                .lineToLinearHeading(new Pose2d(14.61, -33.25, Math.toRadians(0.00)))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+                .lineTo(new Vector2d(43.08, -59.38))
+                .lineToLinearHeading(new Pose2d(60.55, -59.08, Math.toRadians(90.00)))
+//                .lineTo(new Vector2d(62.75, -25.03))
+
+                // .splineTo(new Vector2d(49.39, -35.89), Math.toRadians(0.00)) //.splineTo(new Vector2d(50.28, -40.29), Math.toRadians(0.00))
+
                 .build();
 
-        TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(11.56, -34.48), Math.toRadians(88.36))
-                //lasa pixelu
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(13.83, -34.48), Math.toRadians(1.02))
-                .splineTo(new Vector2d(50.78, -34.86), Math.toRadians(-0.59))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(50.59, -37.52), Math.toRadians(261.03))
-                .splineTo(new Vector2d(48.32, -62.34), Math.toRadians(-88.69))
-                .splineTo(new Vector2d(50.59, -62.34), Math.toRadians(0.00))
-                .splineTo(new Vector2d(61.96, -62.34), Math.toRadians(0.00))
-                //parcare
+        TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(15.05, -62.75, Math.toRadians(90.00)))
+                .splineToConstantHeading(new Vector2d(14.02, -13.72), Math.toRadians(88.09))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                .splineTo(new Vector2d(31.63, -14.31), Math.toRadians(-40.45))
+                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+                .lineTo(new Vector2d(42.06, -59.96))
+                .lineToLinearHeading(new Pose2d(59.82, -58.94, Math.toRadians(90.00)))
+
                 .build();
 
-        TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(22.17, -41.31), Math.toRadians(83.88))
-                //lasa pixelu
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(22.74, -40.74), Math.toRadians(3.81))
-                .splineTo(new Vector2d(50.21, -38.84), Math.toRadians(0.00))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(50.02, -41.87), Math.toRadians(265.24))
-                .splineTo(new Vector2d(48.51, -60.63), Math.toRadians(265.38))
-                .splineTo(new Vector2d(51.35, -60.44), Math.toRadians(3.81))
-                .splineTo(new Vector2d(62.53, -61.01), Math.toRadians(0.00))
-                //parcare
+        TrajectorySequence right = drive.trajectorySequenceBuilder(new Pose2d(15.05, -62.75, Math.toRadians(90.00)))
+                .splineToConstantHeading(new Vector2d(23.85, -20.18), Math.toRadians(88.09))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                .splineTo(new Vector2d(34.86, -12.99), Math.toRadians(-46.65))
+                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+                .lineTo(new Vector2d(42.64, -59.38))
+                .lineToLinearHeading(new Pose2d(61.43, -60.11, Math.toRadians(90.00)))
                 .build();
+
 
         if(auto_case==1)
             drive.followTrajectorySequenceAsync(left);
@@ -129,6 +121,7 @@ public class RosuScurt extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("Caz", auto_case);
             telemetry.update();
             drive.update();
             sleep(20);
@@ -190,13 +183,15 @@ public class RosuScurt extends LinearOpMode {
             double relativePosition = x - 320;
 
             conePosition = determineConePosition(relativePosition);
+            telemetry.addData("Poziția Conului", conePosition);
         }
         if(conePosition == "Stanga"){
             return 1;
         }else if (conePosition == "Dreapta"){
             return 3;
         }
-        return 2;
+        else
+            return 2;
     }
 
     private String determineConePosition(double relativePosition) {

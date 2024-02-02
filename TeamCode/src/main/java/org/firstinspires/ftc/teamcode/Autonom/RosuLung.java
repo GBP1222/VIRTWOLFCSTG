@@ -31,7 +31,7 @@ public class RosuLung extends LinearOpMode {
             "con",
     };
 
-    int auto_case = 3;
+    int auto_case;
     TfodProcessor tfod;
     VisionPortal visionPortal;
     SampleMecanumDrive drive;
@@ -57,13 +57,15 @@ public class RosuLung extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) auto_case = processConePosition();
 
+        telemetry.addData("Caz", auto_case);
+        telemetry.update();
+
         TrajectorySequence left = drive.trajectorySequenceBuilder(new Pose2d(-33.10, -64.51, Math.toRadians(90.00)))
                 .splineToConstantHeading(new Vector2d(-46.31, -21.65), Math.toRadians(88.09))
                 .waitSeconds(0.2)
                 .addTemporalMarker(() -> robot.ParallelClaw())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.ClawLeftOpen())
-                .addTemporalMarker(() -> robot.ClawRightOpen())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.RetractClaw())
                 .waitSeconds(0.2)
@@ -85,12 +87,11 @@ public class RosuLung extends LinearOpMode {
                 .build();
 
         TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(-33.10, -64.51, Math.toRadians(90.00)))
-                .splineToConstantHeading(new Vector2d(-36.48, -14.02), Math.toRadians(88.09))
+                .splineToConstantHeading(new Vector2d(-36.48, -16.22), Math.toRadians(88.09))
                 .waitSeconds(0.2)
                 .addTemporalMarker(() -> robot.ParallelClaw())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.ClawLeftOpen())
-                .addTemporalMarker(() -> robot.ClawRightOpen())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.RetractClaw())
                 .waitSeconds(0.2)
@@ -109,7 +110,6 @@ public class RosuLung extends LinearOpMode {
                 .addTemporalMarker(() -> robot.ParallelClaw())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.ClawLeftOpen())
-                .addTemporalMarker(() -> robot.ClawRightOpen())
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.RetractClaw())
                 .waitSeconds(0.2)
@@ -134,6 +134,7 @@ public class RosuLung extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("Caz", auto_case);
             telemetry.update();
             drive.update();
             sleep(20);
@@ -199,10 +200,11 @@ public class RosuLung extends LinearOpMode {
         }
         if(conePosition == "Stanga"){
             return 1;
-        }else if (conePosition == "Mijloc"){
-            return 2;
+        }else if (conePosition == "Dreapta"){
+            return 3;
         }
-        return 3;
+        else
+        return 2;
     }
 
     private String determineConePosition(double relativePosition) {
