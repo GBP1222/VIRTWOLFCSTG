@@ -16,7 +16,7 @@ public class TeleOp2 extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         RobotHardware2 robot = new RobotHardware2(hardwareMap);
         robot.ClawLeftOpen();
-        robot.ClawLeftClose();
+        robot.ClawRightOpen();
 
         runtime.reset();
         waitForStart();
