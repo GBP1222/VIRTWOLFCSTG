@@ -32,7 +32,7 @@ public class AutoRight extends LinearOpMode
         RobotHardware robot = new RobotHardware(hardwareMap);
 
         robot.setLiftTarget(0);
-        robot.setBratTarget(0);
+//        robot.setBratTarget(0);
         robot.RetractClaw();
         robot.OpenClaw();
 

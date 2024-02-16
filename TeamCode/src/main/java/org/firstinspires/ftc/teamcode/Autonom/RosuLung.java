@@ -50,7 +50,7 @@ public class RosuLung extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         robot.setLiftTarget(0);
-        robot.setBratTarget(0);
+//        robot.setBratTarget(0);
         robot.RetractClaw();
         robot.OpenClaw();
         robot.InitDrone();
@@ -72,10 +72,10 @@ public class RosuLung extends LinearOpMode {
                 .splineTo(new Vector2d(-29.28, -10.50), Math.toRadians(-10.25))
                 .splineTo(new Vector2d(11.52, -14.46), Math.toRadians(-17.73))
 //                .splineTo(new Vector2d(46.90, -48.22), Math.toRadians(0.00))
-                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
-                .lineTo(new Vector2d(42.20, -14.02))
+//                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+//                .lineTo(new Vector2d(42.20, -14.02))
                 .lineToLinearHeading(new Pose2d(59.38, -14.02, Math.toRadians(90.00)))
-
+                .addTemporalMarker(() -> robot.ClawRightOpen())
 
 
 
@@ -97,9 +97,10 @@ public class RosuLung extends LinearOpMode {
                 .waitSeconds(0.2)
                 .splineTo(new Vector2d(-29.28, -10.50), Math.toRadians(-10.25))
                 .splineTo(new Vector2d(11.52, -14.46), Math.toRadians(-17.73))
-                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
-                .lineTo(new Vector2d(42.20, -14.02))
+//                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+//                .lineTo(new Vector2d(42.20, -14.02))
                 .lineToLinearHeading(new Pose2d(59.38, -14.02, Math.toRadians(90.00)))
+                .addTemporalMarker(() -> robot.ClawRightOpen())
 
                 .build();
 
@@ -116,10 +117,10 @@ public class RosuLung extends LinearOpMode {
                 .splineTo(new Vector2d(-29.28, -10.50), Math.toRadians(-10.25))
                 .splineTo(new Vector2d(11.52, -14.46), Math.toRadians(-17.73))
 //                .splineTo(new Vector2d(46.90, -48.22), Math.toRadians(0.00))
-                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
-                .lineTo(new Vector2d(42.20, -14.02))
+//                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+//                .lineTo(new Vector2d(42.20, -14.02))
                 .lineToLinearHeading(new Pose2d(59.38, -14.02, Math.toRadians(90.00)))
-
+                .addTemporalMarker(() -> robot.ClawRightOpen())
 
                 .build();
 

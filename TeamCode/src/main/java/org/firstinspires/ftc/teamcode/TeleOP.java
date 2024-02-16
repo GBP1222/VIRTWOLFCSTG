@@ -18,7 +18,7 @@ public class TeleOP extends LinearOpMode {
         RobotHardware robot = new RobotHardware(hardwareMap);
 
         robot.setLiftTarget(0);
-        robot.setBratTarget(0);
+//        robot.setBratTarget(0);
         robot.RetractClaw();
         robot.InitDrone();
         robot.OpenClaw();
@@ -29,7 +29,7 @@ public class TeleOP extends LinearOpMode {
         while (opModeIsActive())
         {
 
-            robot.LiftPID(gamepad2);
+//            robot.LiftPID(gamepad2);
             robot.BratPID(gamepad2);
             robot.ClawManager(gamepad2);
             robot.InclineClawManager(gamepad2);
@@ -44,7 +44,7 @@ public class TeleOP extends LinearOpMode {
 
             telemetry.addData("Arm Position", robot.getArmPosition());
 //            telemetry.addData("Lift Position Left", robot.getLiftLeftPosition());
-            telemetry.addData("Arm Target", robot.getArmTarget());
+//            telemetry.addData("Arm Target", robot.getArmTarget());
             telemetry.addData("Arm Power", robot.getLiftPower());
             
             

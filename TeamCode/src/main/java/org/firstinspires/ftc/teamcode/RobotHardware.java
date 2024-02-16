@@ -1,24 +1,35 @@
 package org.firstinspires.ftc.teamcode;
 
-import static com.qualcomm.robotcore.util.Range.clip;
+import static java.lang.Runtime.getRuntime;
+
+import org.firstinspires.ftc.teamcode.BratMotionProfile;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.profile.MotionProfile;
+import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
+import com.acmerobotics.roadrunner.profile.MotionState;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.hardware.IMU.Parameters;
+import org.firstinspires.ftc.teamcode.ArmAndSlidersCalibration;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import kotlin.jvm.functions.Function2;
 
 @Config
 public class RobotHardware {
+    ElapsedTime elapsedTime = new ElapsedTime();
+
     public DcMotorEx
             leftFront, leftRear,
             rightRear, rightFront,
@@ -36,18 +47,32 @@ public class RobotHardware {
     boolean manualControl = false;
     PIDController pidController = new PIDController(0, 0, 0);
 
+    ArmAndSlidersCalibration ArmAndSlidersCalibration;
+
     public static double kpLIFT = 0, kiLIFT = 0, kdLIFT = 0, ffLIFT = 0;
     public static int liftTarget = 0;
-    public static double kpBRAT = 0.1, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0.3;
+//    public static double kpBRAT = 0.1, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0.3, kCos = 0.0, kgBrat = 0.0;
     private final double ZERO_OFFSET = 0;
     public static double ticks_in_degrees = 288 / 180.0;
-    public static int BratTarget = 0;
+//    public static int BratTarget = 0;
 
     int high = 0, medium = 0, low = 0;
-    double InitDrone = 0.5;
+    double InitDrone = -1;
     int LaunchPos = 1;
 
+    private double maxAcceleration = 0.0; // Example value, adjust as needed
+    private double maxVelocity = 0.0; // Example value, adjust as needed
+    private double distance = 0.0; // Example value, adjust as needed
+    private double bratKp = 0.0;
+
     public IMU imu;
+
+
+//    public double deceleration_time = 0.0;
+//    public double acceleration_dt = 0.0, deceleration_dt = 0.0,
+//            cruise_dt = 0.0, entire_dt = 0.0, cruise_current_dt = 0.0;
+//    public double halfway_distance = 0.0,
+//            acceleration_distance = 0.0, cruise_distance = 0.0;
 
     public RobotHardware(HardwareMap hardwareMap) {
 
@@ -67,28 +92,33 @@ public class RobotHardware {
         leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightRear.setDirection(DcMotor.Direction.FORWARD);
 
+        ArmAndSlidersCalibration.armMotor = hardwareMap.get(DcMotor.class, "armMotor");
+        ArmAndSlidersCalibration.slideMotor = hardwareMap.get(DcMotor.class, "slideMotor");
+
+        ArmAndSlidersCalibration.initializeMotors();
+
         //endregion
 
         //region MotoareLift
-        Lift = hardwareMap.get(DcMotorEx.class, "Lift");
+//        Lift = hardwareMap.get(DcMotorEx.class, "Brat");
+//
+//        BratStanga = hardwareMap.get(DcMotorEx.class, "BratStanga");
+//        BratDreapta = hardwareMap.get(DcMotorEx.class, "BratDreapta");
+//
+//        Lift.setDirection(DcMotorEx.Direction.FORWARD);
 
-        BratStanga = hardwareMap.get(DcMotorEx.class, "BratStanga");
-        BratDreapta = hardwareMap.get(DcMotorEx.class, "BratDreapta");
+//        BratStanga.setDirection(DcMotor.Direction.FORWARD);
+//        BratDreapta.setDirection(DcMotor.Direction.FORWARD);
 
-        Lift.setDirection(DcMotorEx.Direction.FORWARD);
+//        Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        BratStanga.setDirection(DcMotor.Direction.FORWARD);
-        BratDreapta.setDirection(DcMotor.Direction.FORWARD);
+//        BratStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        BratDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        Lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        BratStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BratDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        Lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        BratStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BratDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        BratStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        BratDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //endregion
 
@@ -116,6 +146,8 @@ public class RobotHardware {
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
+
+        elapsedTime.reset();
 
         //endregion
 
@@ -155,13 +187,9 @@ public class RobotHardware {
         GhearaInclinatie.setPosition(pos);
     }
 
-    public void CloseClaw() {
-        ClawState(closeClaw);
-    }
-
-    public void OpenClaw() {
-        ClawState(openClaw);
-    }
+   public void OpenClaw() {
+      ClawState(openClaw);
+   }
 
 //    public void Drone(Gamepad gamepad) {
 //        if(gamepad.y)
@@ -169,46 +197,6 @@ public class RobotHardware {
 //    }
 
     public void DriveMovement(Gamepad gamepad) {
-//        double Forward = -gamepad.left_stick_y;
-//        double Strafe = gamepad.left_stick_x * 1.1;
-//        double Turn = gamepad.right_stick_x;
-//
-//        if (!gamepad.left_bumper) {
-//            Strafe /= 2;
-//            Forward /= 2;
-//        }
-//        if (!gamepad.right_bumper) {
-//            Turn /= 2;
-//        }
-////        double r = Math.hypot(Strafe, Forward);
-////
-////        double robotAngle = Math.atan2(Forward, Strafe) - Math.PI / 4;
-//
-//        double heading = Math.toRadians(-imu.getAngularOrientation().firstAngle);
-//
-//        double Rotx = Strafe * Math.cos(heading) - Forward * Math.sin(heading);
-//        double Roty = Strafe * Math.sin(heading) + Forward * Math.cos(heading);
-//
-//        double denominator = Math.max(Math.abs(Forward) + Math.abs(Strafe) + Math.abs(Turn), 1);
-//
-////        // Convert robot-centric to field-centric
-////        double fieldAngle = heading - robotAngle;
-//
-////        final double v1 = (r * Math.cos(fieldAngle)) + Turn;
-////        final double v2 = (r * Math.sin(fieldAngle)) - Turn;
-////        final double v3 = (r * Math.sin(fieldAngle)) + Turn;
-////        final double v4 = (r * Math.cos(fieldAngle)) - Turn;
-//
-//        final double v1 = (Rotx + Roty + Turn) / denominator;
-//        final double v2 = (Rotx - Roty - Turn) / denominator;
-//        final double v3 = (Rotx - Roty + Turn) / denominator;
-//        final double v4 = (Rotx + Roty - Turn) / denominator;
-//    //v1,v2,v3,v4
-//
-//        leftFront.setPower(v1);
-//        rightFront.setPower(v2);
-//        leftRear.setPower(v3);
-//        rightRear.setPower(v4);
         double y = -gamepad.left_stick_y; // Remember, Y stick value is reversed
         double x = gamepad.left_stick_x;
         double rx = gamepad.right_stick_x;
@@ -221,25 +209,15 @@ public class RobotHardware {
             rx /= 2;
         }
 
-        // This button choice was made so that it is hard to hit on accident,
-        // it can be freely changed based on preference.
-        // The equivalent button is start on Xbox-style controllers.
         if (gamepad.options) {
             imu.resetYaw();
         }
 
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        // Counteract imperfect strafing
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        // double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = (rotY + rotX + rx);
         double backLeftPower = (rotY - rotX + rx);
         double frontRightPower = (rotY - rotX - rx);
@@ -277,69 +255,57 @@ public class RobotHardware {
 
 
     public void BratPID(Gamepad gamepad) {
-
-//        double manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.5;
 //
-//        if (gamepad.left_stick_y > 0.1 || gamepad.right_stick_y > 0.1)
-//            manualControl = true;
-//        if (gamepad.left_stick_y > 0.9 || gamepad.right_stick_y > 0.9)
-//            manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.7;
-
-//       double manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.2;
+////        double manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.5;
+////
+////        if (gamepad.left_stick_y > 0.1 || gamepad.right_stick_y > 0.1)
+////            manualControl = true;
+////        if (gamepad.left_stick_y > 0.9 || gamepad.right_stick_y > 0.9)
+////            manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.7;
 //
-//        if (gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
-//            manualControl = true;
-//        if (gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
-//            manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.5;
+////       double manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.2;
+////
+////        if (gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
+////            manualControl = true;
+////        if (gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
+////            manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.5;
+//
+//        /*
+//            double currPosInTicks = armMotor.getCurrentPosition();
+//            double ff = ffBRAT * Math.sin(Math.toRadians(ticksToRealWorldDegrees(currPosInTicks)));
+//            public double ticksToRealWorldDegrees(double ticks)
+//            {
+//                return ticks / ticksPerDegree + zeroOffset;
+//            }
+//            double power = pidOutput + ff;
+//            power = Range.clip(power, -powerLimit, powerLimit);
+//         */
+//
+//        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
+//
+//        int armPos = BratStanga.getCurrentPosition();
+//        double pid = pidController.calculate(armPos, BratTarget);
+//        double pidPowerBrat = pid + ffBRAT;
+//
+////        double instantTargetPosition = motion_profile(max_acceleration, max_velocity, distance, elapsed_time);
+////
+////        double motorPower = (instantTargetPosition - BratStanga.getCurrentPosition()) * kpBRAT;
+//
+//        BratDreapta.setPower(pidPowerBrat);
+//        BratStanga.setPower(pidPowerBrat);
+//
+//        if(gamepad.dpad_up)
+//            BratTarget = BratTarget + 1;
+//        if(gamepad.dpad_down)
+//            BratTarget = BratTarget - 1;
+        double startTime = elapsedTime.seconds();
+        double targetposition = BratMotionProfile.calculatePosition(maxAcceleration, maxVelocity, distance, startTime);
+        double BratPower = (targetposition - Lift.getCurrentPosition()) * bratKp;
 
-        /*
-            double currPosInTicks = armMotor.getCurrentPosition();
-            double ff = ffBRAT * Math.sin(Math.toRadians(ticksToRealWorldDegrees(currPosInTicks)));
-            public double ticksToRealWorldDegrees(double ticks)
-            {
-                return ticks / ticksPerDegree + zeroOffset;
-            }
-            double power = pidOutput + ff;
-            power = Range.clip(power, -powerLimit, powerLimit);
-         */
-
-        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
-
-        int armPos = BratStanga.getCurrentPosition();
-        double pid = pidController.calculate(armPos, BratTarget);
-        double pidPowerBrat = pid + ffBRAT;
-
-        pidPowerBrat = clip(pidPowerBrat, -0.5, 0.5);
-
-        BratDreapta.setPower(pidPowerBrat);
-        BratStanga.setPower(pidPowerBrat);
-
-        if(gamepad.dpad_up)
-            BratTarget = BratTarget + 1;
-        if(gamepad.dpad_down)
-            BratTarget = BratTarget - 1;
-
-//        if (manualControl) {
-//            BratDreapt a.setPower(manualArmPower);
-//            BratStanga.setPower(manualArmPower);
-//        }
-//        else {
-//            BratDreapta.setPower(pidPowerBrat);
-//            BratStanga.setPower(pidPowerBrat);
-//        }
+        Lift.setPower(BratPower);
 
     }
-    public void BratPID2(Gamepad gamepad){
-        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
-        int armPos = BratDreapta.getCurrentPosition();
-        double pid = pidController.calculate(armPos, BratTarget);
-        double ff = Math.sin(Math.toRadians(armPos / ticks_in_degrees + ZERO_OFFSET)) * ffBRAT;
 
-        double power = pid + ff;
-
-        BratStanga.setPower(power);
-        BratDreapta.setPower(power);
-    }
     public void DroneManager(Gamepad gamepad) {
         if (gamepad.y && !button3IsPressed) {
             if (toggleDrone)
@@ -391,9 +357,9 @@ public class RobotHardware {
         liftTarget = pos;
     }
 
-    public void setBratTarget(int pos) {
-        BratTarget = pos;
-    }
+//    public void setBratTarget(int pos) {
+//        BratTarget = pos;
+//    }
 
     public void ClawManager(Gamepad gamepad) {
 
@@ -466,9 +432,9 @@ public class RobotHardware {
 ////        return LiftDreapta.getCurrentPosition();
 //    }
 
-    public int getArmTarget() {
-        return BratTarget;
-    }
+//    public int getArmTarget() {
+//        return BratTarget;
+//    }
 
         public int getLiftTarget ()
         {
@@ -518,7 +484,5 @@ public class RobotHardware {
     public void ClawLeftClose() {
         IndividualClawLeftState(openClaw);
     }
-
-
     }
 

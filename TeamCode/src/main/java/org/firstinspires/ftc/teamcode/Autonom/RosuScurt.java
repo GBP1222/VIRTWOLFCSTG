@@ -50,7 +50,7 @@ public class RosuScurt extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         robot.setLiftTarget(0);
-        robot.setBratTarget(0);
+//        robot.setBratTarget(0);
         robot.RetractClaw();
         robot.OpenClaw();
         robot.InitDrone();
@@ -70,9 +70,10 @@ public class RosuScurt extends LinearOpMode {
                 .waitSeconds(1.2)
                 .addTemporalMarker(() -> robot.RetractClaw())
                 .waitSeconds(0.2)
-                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+                //.splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
                 .lineTo(new Vector2d(43.08, -59.38))
                 .lineToLinearHeading(new Pose2d(60.55, -59.08, Math.toRadians(90.00)))
+                .addTemporalMarker(() -> robot.ClawRightOpen())
 //                .lineTo(new Vector2d(62.75, -25.03))
 
                 // .splineTo(new Vector2d(49.39, -35.89), Math.toRadians(0.00)) //.splineTo(new Vector2d(50.28, -40.29), Math.toRadians(0.00))
@@ -89,9 +90,10 @@ public class RosuScurt extends LinearOpMode {
                 .addTemporalMarker(() -> robot.RetractClaw())
                 .waitSeconds(0.2)
                 .splineTo(new Vector2d(31.63, -14.31), Math.toRadians(-40.45))
-                .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
+                //.splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
                 .lineTo(new Vector2d(42.06, -59.96))
                 .lineToLinearHeading(new Pose2d(59.82, -58.94, Math.toRadians(90.00)))
+                .addTemporalMarker(() -> robot.ClawRightOpen())
 
                 .build();
 
@@ -106,8 +108,9 @@ public class RosuScurt extends LinearOpMode {
                 .waitSeconds(0.2)
                 .splineTo(new Vector2d(34.86, -12.99), Math.toRadians(-46.65))
                 .splineTo(new Vector2d(43.38, -42.79), Math.toRadians(0.00))
-                .lineTo(new Vector2d(42.64, -59.38))
+                //.lineTo(new Vector2d(42.64, -59.38))
                 .lineToLinearHeading(new Pose2d(61.43, -60.11, Math.toRadians(90.00)))
+                .addTemporalMarker(() -> robot.ClawRightOpen())
                 .build();
 
 

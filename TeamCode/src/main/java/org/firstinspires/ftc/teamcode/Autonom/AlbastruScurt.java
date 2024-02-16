@@ -45,79 +45,66 @@ public class AlbastruScurt extends LinearOpMode {
         initTfod();
         telemetryTfod();
 
-        Pose2d startPose = new Pose2d(15.29, 62.52, Math.toRadians(270.00)); // determina pozitia reala de start
+        Pose2d startPose = new Pose2d(15.05, 62.75, Math.toRadians(270.00));
 
         drive.setPoseEstimate(startPose);
 
+        robot.setLiftTarget(0);
+//        robot.setBratTarget(0);
+        robot.RetractClaw();
+        robot.OpenClaw();
+        robot.InitDrone();
+
         while (!isStarted() && !isStopRequested()) auto_case = processConePosition();
 
-        TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(23.42, 39.68), Math.toRadians(270.00))
-                //lasa pixelu
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(24.00, 39.48), Math.toRadians(0.00))
-                .splineTo(new Vector2d(49.35, 35.23), Math.toRadians(0.00))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(49.35, 35.03), Math.toRadians(88.53))
-                .splineTo(new Vector2d(49.94, 59.42), Math.toRadians(88.75))
-                .splineTo(new Vector2d(49.94, 59.23), Math.toRadians(2.12))
-                .splineTo(new Vector2d(61.74, 60.00), Math.toRadians(0.00))
-                //parcare
+        TrajectorySequence left = drive.trajectorySequenceBuilder(new Pose2d(15.05, 62.75, Math.toRadians(270.00)))
+                .splineToConstantHeading(new Vector2d(23.85, 20.18), Math.toRadians(271.91))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawRightOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                .splineTo(new Vector2d(34.86, 12.99), Math.toRadians(406.65))
+                //.splineTo(new Vector2d(43.38, 42.79), Math.toRadians(360.00))
+                .lineTo(new Vector2d(42.64, 59.38))
+                .lineToLinearHeading(new Pose2d(61.43, 60.11, Math.toRadians(270.00)))
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
+
                 .build();
 
-        TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(12.39, 32.71), Math.toRadians(270.00))
-                //lasa pixelu
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(13.16, 32.90), Math.toRadians(-2.20))
-                .splineTo(new Vector2d(50.71, 33.29), Math.toRadians(0.00))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(50.32, 33.68), Math.toRadians(91.68))
-                .splineTo(new Vector2d(49.94, 58.84), Math.toRadians(90.88))
-                .splineTo(new Vector2d(49.74, 58.84), Math.toRadians(0.00))
-                .splineTo(new Vector2d(62.71, 59.23), Math.toRadians(0.00))
-                //parcare
+        TrajectorySequence middle = drive.trajectorySequenceBuilder(new Pose2d(15.05, 62.75, Math.toRadians(270.00)))
+                .splineToConstantHeading(new Vector2d(14.02, 13.72), Math.toRadians(271.91))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawRightOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                .splineTo(new Vector2d(31.63, 14.31), Math.toRadians(400.45))
+                //.splineTo(new Vector2d(43.38, 42.79), Math.toRadians(360.00))
+                .lineTo(new Vector2d(42.06, 59.96))
+                .lineToLinearHeading(new Pose2d(59.82, 58.94, Math.toRadians(270.00)))
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
+                
                 .build();
 
-        TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)// adauga pasi aici
-                .splineTo(new Vector2d(10.26, 33.29), Math.toRadians(180.00))
-                //lasa pixelu prima banda
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                .splineTo(new Vector2d(10.45, 33.29), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.52, 33.87), Math.toRadians(0.00))
-                //lasa pixelu pe tablou
-                //muta bratu de tot in fata
-                .addTemporalMarker(() -> robot.OpenClaw())// schimba asta la toate /
-                // trebuie functie pt fiecare parte din gheara :0
-                .waitSeconds(0.01)
-                .addTemporalMarker(() -> robot.CloseClaw())
-                //muta bratu inapoi
-                .splineTo(new Vector2d(50.71, 34.26), Math.toRadians(90.00))
-                .splineTo(new Vector2d(50.13, 57.68), Math.toRadians(91.42))
-                .splineTo(new Vector2d(50.71, 57.48), Math.toRadians(5.71))
-                .splineTo(new Vector2d(62.90, 59.03), Math.toRadians(1.85))
-                //parcare
+        TrajectorySequence right = drive.trajectorySequenceBuilder(new Pose2d(15.05, 62.75, Math.toRadians(270.00)))
+                .splineTo(new Vector2d(16.07, 48.37), Math.toRadians(264.10))
+                .lineToLinearHeading(new Pose2d(14.61, 33.25, Math.toRadians(360.00)))
+                .waitSeconds(0.2)
+                .addTemporalMarker(() -> robot.ParallelClaw())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.ClawRightOpen())
+                .waitSeconds(1.2)
+                .addTemporalMarker(() -> robot.RetractClaw())
+                .waitSeconds(0.2)
+                //.splineTo(new Vector2d(43.38, 42.79), Math.toRadians(360.00))
+                .lineTo(new Vector2d(43.08, 59.38))
+                .lineToLinearHeading(new Pose2d(60.55, 59.08, Math.toRadians(270.00)))
+                .addTemporalMarker(() -> robot.ClawLeftOpen())
                 .build();
 
         if(auto_case==1)
