@@ -12,6 +12,8 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.arcrobotics.ftclib.controller.PIDController;
 import org.firstinspires.ftc.teamcode.ArmAndSlidersCalibration;
+
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -34,7 +36,7 @@ public class RobotHardware {
             leftFront, leftRear,
             rightRear, rightFront,
             Lift,
-            BratDreapta, BratStanga;
+            Brat;
     public Servo
             GhearaStanga, GhearaDreapta,
             GhearaInclinatie, Drona;
@@ -43,27 +45,21 @@ public class RobotHardware {
     double InclineClawRetract = -1;
     double InclineClawParallel = 0.8;
     boolean buttonIsPressed = false, toggleClaw = false, button2IsPressed = false, toggleInclineClaw = false, toggleDrone = false, button3IsPressed = false;
+    public static int BratTarget = 0;
+
     public double pid;
+    boolean manualControlBrat = false;
+    boolean manualControlLift = false;
     boolean manualControl = false;
     PIDController pidController = new PIDController(0, 0, 0);
 
-    ArmAndSlidersCalibration ArmAndSlidersCalibration;
+    public static double kpBRAT = 0, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0;
+    public static double kpLift = 0, kiLift = 0, kdLift = 0, ffLift = 0;
 
-    public static double kpLIFT = 0, kiLIFT = 0, kdLIFT = 0, ffLIFT = 0;
     public static int liftTarget = 0;
-//    public static double kpBRAT = 0.1, kiBRAT = 0, kdBRAT = 0, ffBRAT = 0.3, kCos = 0.0, kgBrat = 0.0;
-    private final double ZERO_OFFSET = 0;
-    public static double ticks_in_degrees = 288 / 180.0;
-//    public static int BratTarget = 0;
 
-    int high = 0, medium = 0, low = 0;
     double InitDrone = -1;
     int LaunchPos = 1;
-
-    private double maxAcceleration = 0.0; // Example value, adjust as needed
-    private double maxVelocity = 0.0; // Example value, adjust as needed
-    private double distance = 0.0; // Example value, adjust as needed
-    private double bratKp = 0.0;
 
     public IMU imu;
 
@@ -92,32 +88,32 @@ public class RobotHardware {
         leftRear.setDirection(DcMotor.Direction.REVERSE);
         rightRear.setDirection(DcMotor.Direction.FORWARD);
 
-        ArmAndSlidersCalibration.armMotor = hardwareMap.get(DcMotor.class, "armMotor");
-        ArmAndSlidersCalibration.slideMotor = hardwareMap.get(DcMotor.class, "slideMotor");
-
-        ArmAndSlidersCalibration.initializeMotors();
+//        ArmAndSlidersCalibration.armMotor = hardwareMap.get(DcMotor.class, "armMotor");
+//        ArmAndSlidersCalibration.slideMotor = hardwareMap.get(DcMotor.class, "slideMotor");
+//
+//        ArmAndSlidersCalibration.initializeMotors();
 
         //endregion
 
         //region MotoareLift
-//        Lift = hardwareMap.get(DcMotorEx.class, "Brat");
-//
-//        BratStanga = hardwareMap.get(DcMotorEx.class, "BratStanga");
-//        BratDreapta = hardwareMap.get(DcMotorEx.class, "BratDreapta");
-//
-//        Lift.setDirection(DcMotorEx.Direction.FORWARD);
+        Lift = hardwareMap.get(DcMotorEx.class, "Lift");
 
-//        BratStanga.setDirection(DcMotor.Direction.FORWARD);
+        Brat = hardwareMap.get(DcMotorEx.class, "Brat");
+//        BratDreapta = hardwareMap.get(DcMotorEx.class, "BratDreapta");
+
+        Lift.setDirection(DcMotorEx.Direction.REVERSE);
+
+        Brat.setDirection(DcMotor.Direction.FORWARD);
 //        BratDreapta.setDirection(DcMotor.Direction.FORWARD);
 
-//        Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        BratStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Brat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        BratDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        Lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-//        BratStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Brat.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        BratDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //endregion
@@ -231,81 +227,53 @@ public class RobotHardware {
 
     public void LiftPID(Gamepad gamepad) {
 
-        double ManualLiftPower = (gamepad.left_trigger-gamepad.right_trigger+ffLIFT)*0.5;
+//        if(gamepad.dpad_up)
+//        {
+//            setLiftTarget(high);
+//            manualControl = false;
+//        }
+//        else if(gamepad.dpad_left)
+//        {
+//            setLiftTarget(medium);
+//            manualControl = false;
+//        }
+//        else if(gamepad.dpad_down)
+//        {
+//            setLiftTarget(low);
+//            manualControl = false;
+//        }
+
+        double manualPower = (gamepad.left_trigger-gamepad.right_trigger+ffLift)*0.5;
+
         if(gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
-            manualControl = true;
+            manualControl=true;
         if(gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
-            ManualLiftPower = (gamepad.left_trigger-gamepad.right_trigger+ffLIFT)*0.7;
+            manualPower = (gamepad.left_trigger-gamepad.right_trigger+ffLift)*0.7;
 
-        pidController.setPID(kpLIFT, kiLIFT, kdLIFT);
-        int LiftPos = Lift.getCurrentPosition();
-        double pid = pidController.calculate(LiftPos, liftTarget);
-        double pidPowerLIFT = pid + ffLIFT;
-
-        if (manualControl) {
-            Lift.setPower(ManualLiftPower);
-//            LiftDreapta.setPower(manualPower);
-//            LiftStanga.setPower(manualPower);
-        } else {
-            Lift.setPower(pidPowerLIFT);
-//            LiftDreapta.setPower(pidPower);
-//            LiftStanga.setPower(pidPower);
+        pidController.setPID(kpLift, kiLift, kdLift);
+        int armPos = Lift.getCurrentPosition();
+        double pid = pidController.calculate(armPos, liftTarget);
+        double pidPower = pid + ffLift;
+        if(manualControl)
+        {
+            Lift.setPower(manualPower);
+        }
+        else
+        {
+            Lift.setPower(pidPower);
         }
     }
 
 
-    public void BratPID(Gamepad gamepad) {
-//
-////        double manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.5;
-////
-////        if (gamepad.left_stick_y > 0.1 || gamepad.right_stick_y > 0.1)
-////            manualControl = true;
-////        if (gamepad.left_stick_y > 0.9 || gamepad.right_stick_y > 0.9)
-////            manualArmPower = (gamepad.left_stick_y - gamepad.right_stick_y + ffBRAT) * 0.7;
-//
-////       double manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.2;
-////
-////        if (gamepad.left_trigger > 0.1 || gamepad.right_trigger > 0.1)
-////            manualControl = true;
-////        if (gamepad.left_trigger > 0.9 || gamepad.right_trigger > 0.9)
-////            manualArmPower = (gamepad.left_trigger - gamepad.right_trigger + ffBRAT) * 0.5;
-//
-//        /*
-//            double currPosInTicks = armMotor.getCurrentPosition();
-//            double ff = ffBRAT * Math.sin(Math.toRadians(ticksToRealWorldDegrees(currPosInTicks)));
-//            public double ticksToRealWorldDegrees(double ticks)
-//            {
-//                return ticks / ticksPerDegree + zeroOffset;
-//            }
-//            double power = pidOutput + ff;
-//            power = Range.clip(power, -powerLimit, powerLimit);
-//         */
-//
-//        pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
-//
-//        int armPos = BratStanga.getCurrentPosition();
-//        double pid = pidController.calculate(armPos, BratTarget);
-//        double pidPowerBrat = pid + ffBRAT;
-//
-////        double instantTargetPosition = motion_profile(max_acceleration, max_velocity, distance, elapsed_time);
-////
-////        double motorPower = (instantTargetPosition - BratStanga.getCurrentPosition()) * kpBRAT;
-//
-//        BratDreapta.setPower(pidPowerBrat);
-//        BratStanga.setPower(pidPowerBrat);
-//
-//        if(gamepad.dpad_up)
-//            BratTarget = BratTarget + 1;
-//        if(gamepad.dpad_down)
-//            BratTarget = BratTarget - 1;
-        double startTime = elapsedTime.seconds();
-        double targetposition = BratMotionProfile.calculatePosition(maxAcceleration, maxVelocity, distance, startTime);
-        double BratPower = (targetposition - Lift.getCurrentPosition()) * bratKp;
+  public void BratPID(Gamepad gamepad) {
+      pidController.setPID(kpBRAT, kiBRAT, kdBRAT);
+      int armPos = Lift.getCurrentPosition();
+      double pid = pidController.calculate(armPos, BratTarget);
+      double pidPower = pid + ffBRAT;
 
-        Lift.setPower(BratPower);
+      Brat.setPower(pidPower);
 
-    }
-
+}
     public void DroneManager(Gamepad gamepad) {
         if (gamepad.y && !button3IsPressed) {
             if (toggleDrone)
@@ -351,15 +319,15 @@ public class RobotHardware {
 //            ServoStanga.setPosition(0.8);
 //            ServoDreapta.setPosition(0.2);
 //        }
-//    }
+//   }
 
     public void setLiftTarget(int pos) {
         liftTarget = pos;
     }
 
-//    public void setBratTarget(int pos) {
-//        BratTarget = pos;
-//    }
+    public void setBratTarget(int pos) {
+        BratTarget = pos;
+    }
 
     public void ClawManager(Gamepad gamepad) {
 
@@ -422,9 +390,9 @@ public class RobotHardware {
 //        return LiftStanga.getCurrentPosition();
     }
 
-    public int getArmPosition() {
-        return BratStanga.getCurrentPosition();
-    }
+   // public int getArmPosition() {
+      //  return BratStanga.getCurrentPosition();
+   // }
 
 //    public int getLiftRightPosition()
 //    {
@@ -440,9 +408,9 @@ public class RobotHardware {
         {
             return liftTarget;
         }
-        public double getArmPower() {
-            return BratStanga.getPower();
-        }
+       // public double getArmPower() {
+        //    return BratStanga.getPower();
+      //  }
 
         public double getLiftPower ()
         {
