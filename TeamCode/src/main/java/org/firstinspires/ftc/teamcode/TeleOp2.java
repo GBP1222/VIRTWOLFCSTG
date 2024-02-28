@@ -30,8 +30,9 @@ public class TeleOp2 extends LinearOpMode {
 //            robot.InclineClawManager(gamepad2);
 //            robot.DriveMovement(gamepad1);
             telemetry.addData("Runtime Seconds - ", runtime.seconds());
+            telemetry.addData("Target Brat Pos ", robot.ReturnPosBrat());
             telemetry.addData("Brat Pos ", robot.Brat.getCurrentPosition());
-            telemetry.addData("Target Lift Pos ", robot.ReturnPos());
+            telemetry.addData("Target Lift Pos ", robot.ReturnPosLift());
             telemetry.addData("Lift Pos ", robot.Lift.getCurrentPosition());
 
             telemetry.update();

@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 @Config
 public class RobotHardware2 {
     ElapsedTime elapsedTime = new ElapsedTime();
@@ -27,8 +29,8 @@ public class RobotHardware2 {
     boolean manualControlLift = false;
     PIDController pidController = new PIDController(0, 0, 0);
 
-    public static double kpBrat = 0.006, kiBrat = 0, kdBrat = 0, ffBrat = 0.01;
-    public static double kpLift = 0.003, kiLift = 0, kdLift = 0, ffLift = 0.001;
+    public static double kpBrat = 0.005, kiBrat = 0, kdBrat = 0, ffBrat = 0.016;
+    public static double kpLift = 0.003, kiLift = 0, kdLift = 0, ffLift = 0.01;
 
     public static int liftTarget = 0, BratTarget = 0;
 
@@ -46,20 +48,20 @@ public class RobotHardware2 {
 
     public RobotHardware2(HardwareMap hardwareMap){
 
-//        leftFront = hardwareMap.get(DcMotorEx.class, "LeftFront_OdometryLeft");
-//        leftRear = hardwareMap.get(DcMotorEx.class, "LeftBack");
-//        rightRear = hardwareMap.get(DcMotorEx.class, "RightBack_OdometryFront");
-//        rightFront = hardwareMap.get(DcMotorEx.class, "RightFront_OdometryRight");
-//
-//        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//
-//        leftFront.setDirection(DcMotor.Direction.REVERSE);
-//        rightFront.setDirection(DcMotor.Direction.FORWARD);
-//        leftRear.setDirection(DcMotor.Direction.REVERSE);
-//        rightRear.setDirection(DcMotor.Direction.FORWARD);
+        leftFront = hardwareMap.get(DcMotorEx.class, "LeftFront_OdometryLeft");
+        leftRear = hardwareMap.get(DcMotorEx.class, "LeftBack");
+        rightRear = hardwareMap.get(DcMotorEx.class, "RightBack_OdometryFront");
+        rightFront = hardwareMap.get(DcMotorEx.class, "RightFront_OdometryRight");
+
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
 
 
         Brat = hardwareMap.get(DcMotorEx.class, "Brat");
@@ -85,7 +87,7 @@ public class RobotHardware2 {
 //        GhearaDreapta = hardwareMap.get(Servo.class, "GhearaDreapta");
 //
 //        GhearaInclinatie = hardwareMap.get(Servo.class, "GhearaInclinatie");
-
+//
 //        GhearaInclinatie.setDirection(Servo.Direction.FORWARD);
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -96,8 +98,6 @@ public class RobotHardware2 {
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
-
-//        ArmAndSliders.initializeMotors();
     }
 
     public void LiftPID(Gamepad gamepad) {
@@ -122,7 +122,7 @@ public class RobotHardware2 {
 
     public void BratPID(Gamepad gamepad) {
 
-        double ManualBratPower = (gamepad.right_stick_x+ffBrat)/5;
+        double ManualBratPower = 0.5;
         if(gamepad.right_stick_x != 0.0)
             manualControlBrat = true;
 
@@ -138,117 +138,41 @@ public class RobotHardware2 {
         }
     }
 
-    public int ReturnPos(){
+    public int ReturnPosLift(){
         return liftTarget;
     }
-//
-//    public void ClawStateIndivi(double pos,boolean stg) {
-//        if(stg)
-//            GhearaStanga.setPosition(pos);
-//        else
-//            GhearaDreapta.setPosition(pos);
-//    }
+    public int ReturnPosBrat(){ return BratTarget; }
 
-//    public void InclineClawManager(Gamepad gamepad) {
-//
-//        if (gamepad.right_bumper && !button2IsPressed) {
-//            if (toggleInclineClaw)
-//                InclineClawState(InclineClawRetract);
-//            else
-//                InclineClawState(InclineClawParallel);
-//            button2IsPressed = true;
-//            toggleInclineClaw = !toggleInclineClaw;
-//        } else if (!gamepad.right_bumper)
-//            button2IsPressed = false;
-//
-//    }
-//
-//    public void ClawDreapta(Gamepad gamepad) {
-//
-//        if (gamepad.b && !buttonIsPressed) {
-//            if (toggleClaw)
-//                ClawStateIndivi(closeClaw,false);
-//            else
-//                ClawStateIndivi(openClaw,false);
-//            buttonIsPressed = true;
-//            toggleClaw = !toggleClaw;
-//        } else if (!gamepad.b)
-//            buttonIsPressed = false;
-//
-//    }
-//
-//    public void ClawStanga  (Gamepad gamepad) {
-//
-//        if (gamepad.x && !buttonIsPressed) {
-//            if (toggleClaw)
-//                ClawStateIndivi(closeClaw, true);
-//            else
-//                ClawStateIndivi(openClaw, true);
-//            buttonIsPressed = true;
-//            toggleClaw = !toggleClaw;
-//        } else if (!gamepad.x)
-//            buttonIsPressed = false;
-//    }
-//
-//    public void InclineClawState(double pos) {
-//        GhearaInclinatie.setPosition(pos);
-//    }
-//
-//    public void ClawLeftOpen() {
-//        IndividualClawLeftState(closeClaw);
-//    }
-//
-//    public void ClawLeftClose() {
-//        IndividualClawLeftState(openClaw);
-//    }
-//
-//    public void IndividualClawLeftState(double pos) {
-//        GhearaStanga.setPosition(pos);
-//    }
-//
-//    public void IndividualClawRightState(double pos) {
-//        GhearaDreapta.setPosition(pos);
-//    }
-//
-//    public void ClawRightOpen() {
-//        IndividualClawRightState(closeClaw);
-//    }
-//
-//    public void ClawRightClose() {
-//        IndividualClawRightState(openClaw);
-//    }
-//
-//    public void DriveMovement(Gamepad gamepad) {
-//        double y = -gamepad.left_stick_y; // Remember, Y stick value is reversed
-//        double x = gamepad.left_stick_x;
-//        double rx = gamepad.right_stick_x;
-//
-//        if (!gamepad.left_bumper) {
-//            x /= 2;
-//            y /= 2;
-//        }
-//        if (!gamepad.right_bumper) {
-//            rx /= 2;
-//        }
-//
-//        if (gamepad.options) {
-//            imu.resetYaw();
-//        }
-//
-//        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-//
-//        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-//        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-//
-//        double frontLeftPower = (rotY + rotX + rx);
-//        double backLeftPower = (rotY - rotX + rx);
-//        double frontRightPower = (rotY - rotX - rx);
-//        double backRightPower = (rotY + rotX - rx);
-//
-//        leftFront.setPower(frontLeftPower);
-//        leftRear.setPower(backLeftPower);
-//        rightFront.setPower(frontRightPower);
-//        rightRear.setPower(backRightPower);
-//    }
+    public void DriveMovement(Gamepad gamepad) {
+        double y = -gamepad.left_stick_y; // Remember, Y stick value is reversed
+        double x = gamepad.left_stick_x;
+        double rx = gamepad.right_stick_x;
+
+        if (!gamepad.left_bumper) {
+            x /= 2;
+            y /= 2;
+        }
+        if (!gamepad.right_bumper) {
+            rx /= 2;
+        }
+
+        if (gamepad.options) {
+            imu.resetYaw();
+        }
+
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        double frontLeftPower = (rotY + rotX + rx);
+        double backLeftPower = (rotY - rotX + rx);
+        double frontRightPower = (rotY - rotX - rx);
+        double backRightPower = (rotY + rotX - rx);
+
+        leftFront.setPower(frontLeftPower);
+        leftRear.setPower(backLeftPower);
+        rightFront.setPower(frontRightPower);
+        rightRear.setPower(backRightPower);
+    }
 }
-
